@@ -3,11 +3,14 @@ import { Star, Trophy, Target, Zap, Play, Coins } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BuyPythiaModal } from '../components/BuyPythiaModal';
 import { useWallet } from '../context/WalletContext';
+import { GAME_AVATARS } from '../constants/avatars';
+
+const avatar = GAME_AVATARS[0];
 
 export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const navigate = useNavigate();
-  const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected, userProfile } = useWallet();
+  const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected, userProfile, walletAddress } = useWallet();
 
   useEffect(() => {
     if (!isConnected) {
@@ -16,6 +19,13 @@ export function ProfilePage() {
   }, [isConnected, navigate]);
   const energyPercentage = (currentEnergy / maxEnergy) * 100;
 
+  const handleJoinGame = () => {
+    if (walletAddress) {
+      window.open(`https://backendforgames.ru/${walletAddress}`, '_blank');
+    }
+  };
+
+  const balance = pythiaBalance ? pythiaBalance : 0
   return (
     <>
     <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
@@ -26,23 +36,23 @@ export function ProfilePage() {
               className="w-16 h-16 md:w-20 md:h-20 glass-effect pixel-corners
                        flex items-center justify-center"
               style={{ 
-                backgroundColor: userProfile?.avatar.bgColor,
-                boxShadow: `0 0 10px ${userProfile?.avatar.borderColor}` 
+                backgroundColor: avatar.bgColor,
+                boxShadow: `0 0 10px ${avatar.borderColor}` 
               }}
             >
-              {userProfile && React.createElement(userProfile.avatar.icon, {
+              {userProfile && React.createElement(avatar.icon, {
                 size: 32,
-                style: { color: userProfile.avatar.borderColor },
+                style: { color: avatar.borderColor },
                 strokeWidth: 1.5
               })}
             </div>
             <div className="flex-1">
               <h2 className="text-sm md:text-base text-[#00ff00] tracking-wider mb-2">
-                {userProfile?.username.toUpperCase()}
+                {userProfile?.username!.toUpperCase()}
               </h2>
               <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: userProfile?.avatar.borderColor }}>
-                  {userProfile?.avatar.name}
+                <span className="text-xs" style={{ color: avatar.borderColor }}>
+                  {avatar.name}
                 </span>
               </div>
             </div>
@@ -77,7 +87,7 @@ export function ProfilePage() {
             {/* Energy Cards */}
             <div className="grid grid-cols-3 gap-2 mb-6">
               <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                            ${pythiaBalance < 100 ? 'border border-[#00ff00]' : ''}`}>
+                            ${balance < 100 ? 'border border-[#00ff00]' : ''}`}>
                 <div className="relative z-10">
                   <div className="flex items-center justify-center gap-1 mb-2">
                     <Zap className="w-4 h-4 text-[#00ff00]" />
@@ -85,13 +95,13 @@ export function ProfilePage() {
                   </div>
                   <div className="text-[10px] text-gray-400">0-100 $PYTHIA</div>
                 </div>
-                {pythiaBalance < 100 && (
+                {balance < 100 && (
                   <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
                 )}
               </div>
 
               <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                            ${pythiaBalance >= 100 && pythiaBalance < 300 ? 'border border-[#00ff00]' : ''}`}>
+                            ${balance >= 100 && balance < 300 ? 'border border-[#00ff00]' : ''}`}>
                 <div className="relative z-10">
                   <div className="flex items-center justify-center gap-1 mb-2">
                     <Zap className="w-4 h-4 text-[#00ff00]" />
@@ -99,13 +109,13 @@ export function ProfilePage() {
                   </div>
                   <div className="text-[10px] text-gray-400">100-300 $PYTHIA</div>
                 </div>
-                {pythiaBalance >= 100 && pythiaBalance < 300 && (
+                {balance >= 100 && balance < 300 && (
                   <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
                 )}
               </div>
 
               <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                            ${pythiaBalance >= 300 ? 'border border-[#00ff00]' : ''}`}>
+                            ${balance >= 300 ? 'border border-[#00ff00]' : ''}`}>
                 <div className="relative z-10">
                   <div className="flex items-center justify-center gap-1 mb-2">
                     <Zap className="w-4 h-4 text-[#00ff00]" />
@@ -113,7 +123,7 @@ export function ProfilePage() {
                   </div>
                   <div className="text-[10px] text-gray-400">300+ $PYTHIA</div>
                 </div>
-                {pythiaBalance >= 300 && (
+                {balance >= 300 && (
                   <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
                 )}
               </div>
@@ -157,6 +167,7 @@ export function ProfilePage() {
                          : 'bg-gray-700 text-gray-300 cursor-not-allowed'
                      }`}
             disabled={currentEnergy === 0}
+            onClick={handleJoinGame}
           >
             <Play className="w-6 h-6" fill="currentColor" />
             {currentEnergy > 0 ? 'START GAME' : 'NO ENERGY'}
