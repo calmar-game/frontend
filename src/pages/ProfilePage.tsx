@@ -34,7 +34,7 @@ export function ProfilePage() {
       reward: '+5 энергии',
       completed: false,
       icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://neiry.ai', '_blank')
+      action: () => window.open('https://neiry.ai')
     },
     {
       id: 'link2',
@@ -42,7 +42,7 @@ export function ProfilePage() {
       reward: '+5 энергии',
       completed: false,
       icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://x.com/neirylab', '_blank')
+      action: () => window.open('https://discord.gg/cryptorunner')
     },
     {
       id: 'link3',
@@ -50,7 +50,7 @@ export function ProfilePage() {
       reward: '+5 энергии',
       completed: false,
       icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://t.me/ratpythia', '_blank')
+      action: () => window.open('https://t.me/ratpythia')
     },
     {
       id: 'play-game',
@@ -58,7 +58,7 @@ export function ProfilePage() {
       reward: '+15 энергии',
       completed: false,
       icon: <Play className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open(`https://backendforgames.com/runner/?walletAddress=Value2`, '_blank')
+      action: () => window.open(`https://backendforgames.com/runner/?walletAddress=Value2`)
     },
   ];
 
