@@ -1,26 +1,34 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { useTokenBalance } from "../hooks/useTokenBalance";
-import { useUser } from "../hooks/useUser";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider, useWallet as useSolanaWallet } from "@solana/wallet-adapter-react";
 import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter } from "@solana/wallet-adapter-wallets";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
-import { getAccount } from "@solana/spl-token";
-import { registerUser, User } from "../api";
+import { clusterApiUrl } from "@solana/web3.js";
 
 import '@solana/wallet-adapter-react-ui/styles.css';
 
+interface UserProfile {
+  username: string;
+  avatar: {
+    id: number;
+    name: string;
+    icon: any;
+    description: string;
+    borderColor: string;
+    bgColor: string;
+  };
+}
 
 interface WalletContextType {
-  pythiaBalance: number | null;
+  pythiaBalance: number;
   maxEnergy: number;
   currentEnergy: number;
   isConnected: boolean;
   walletAddress: string | null;
   isLoading: boolean;
-  userProfile: User | null;
-  setUserProfile: (profile: Partial<User>) => Promise<void>;
+  userProfile: UserProfile | null;
+  setUserProfile: (profile: UserProfile) => Promise<void>;
   refreshBalance: () => Promise<void>;
 }
 
@@ -35,21 +43,19 @@ function calculateMaxEnergy(pythiaBalance: number): number {
 function WalletStateProvider({ children }: { children: React.ReactNode }) {
   const [currentEnergy, setCurrentEnergy] = useState(0);
   const [showLoading, setShowLoading] = useState(false);
-  const [userProfile, setUserProfileState] = useState<User | null>(null);
+  const [userProfile, setUserProfileState] = useState<UserProfile | null>(null);
   const wallet = useSolanaWallet();
   const isConnected = !!wallet.connected;
   const walletAddress = wallet.publicKey?.toBase58() || null;
   
   const { balance: pythiaBalance, isLoading, error } = useTokenBalance();
-  const { user } = useUser(walletAddress);
   const maxEnergy = calculateMaxEnergy(pythiaBalance || 0);
 
-  // Синхронизируем профиль с данными пользователя
-  useEffect(() => {
-    if (user) {
-      setUserProfileState(user);
-    }
-  }, [user]);
+  // Убираем эффект, который показывал экран загрузки при подключении кошелька
+
+  const handleLoadingComplete = () => {
+    setShowLoading(false);
+  };
 
   useEffect(() => {
     if (pythiaBalance !== null) {
@@ -59,27 +65,15 @@ function WalletStateProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pythiaBalance]);
 
-  const handleLoadingComplete = () => {
-    setShowLoading(false);
-  };
-
-  const setUserProfile = async (profile: Partial<User>) => {
-    if (!walletAddress || !profile.username) {
-      throw new Error('Wallet not connected');
-    }
-
+  const setUserProfile = async (profile: UserProfile) => {
     setShowLoading(true);
     try {
-      const updatedUser = await registerUser(walletAddress, profile.username);
-
-      if (updatedUser) {
-        setUserProfileState(updatedUser);
-      }
+      // Имитируем задержку сохранения профиля
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setUserProfileState(profile);
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      throw error;
-    } finally {
       setShowLoading(false);
+      throw error;
     }
   };
 
@@ -95,6 +89,8 @@ function WalletStateProvider({ children }: { children: React.ReactNode }) {
       if (tokenAccounts.value.length > 0) {
         const account = await getAccount(connection, tokenAccounts.value[0].pubkey);
         const newBalance = Number(account.amount) / Math.pow(10, 6);
+        // Обновляем баланс в useTokenBalance
+        // Обновляем энергию
         setCurrentEnergy(calculateMaxEnergy(newBalance));
       }
     } catch (error) {

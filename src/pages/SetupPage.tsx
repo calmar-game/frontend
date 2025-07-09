@@ -41,6 +41,7 @@ export function SetupPage() {
     try {
       await setUserProfile({
         username,
+        avatar: GAME_AVATARS[selectedAvatar]
       });
       navigate('/profile');
     } catch (error) {
