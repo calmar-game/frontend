@@ -156,6 +156,9 @@ export function ProfilePage() {
                          ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
                          : 'bg-gray-700 text-gray-300 cursor-not-allowed'
                      }`}
+            onClick={() => {
+              window.open(`https://backendforgames.com/runner/?walletAddress=Value2`, '_blank');
+            }}
             disabled={currentEnergy === 0}
           >
             <Play className="w-6 h-6" fill="currentColor" />
