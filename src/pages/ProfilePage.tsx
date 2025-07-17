@@ -6,63 +6,31 @@ import { useWalletStore } from '../store/walletStore';
 import { useAuthStore } from '../store/authStore';
 import { Navbar } from '../components/Navbar';
 import { useEffect, useState } from 'react';
-interface Task {
-  id: string;
-  title: string;
-  reward: string;
-  completed: boolean;
-  icon: React.ReactNode;
-  action?: () => void;
-}
+import { getProfile, getTasks } from '../api';
+import React from 'react';
 
 
 export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-
+  const { accessToken } = useAuthStore();
   const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected } = useWalletStore();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [profile, setProfile] = useState(null);
 
-  const tasks: Task[] = [
-    {
-      id: 'buy-pythia',
-      title: 'Пополни баланс PYTHIA на 100 токенов',
-      reward: '+30 энергии',
-      completed: pythiaBalance >= 100,
-      icon: <Coins className="w-5 h-5 text-[#00ff00]" />,
-      action: () => setIsBuyModalOpen(true)
-    },
-    {
-      id: 'link1',
-      title: 'Перейди на наш сайт',
-      reward: '+5 энергии',
-      completed: false,
-      icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://neiry.ai')
-    },
-    {
-      id: 'link2',
-      title: 'Подпишись на наш X (Twitter)',
-      reward: '+5 энергии',
-      completed: false,
-      icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://discord.gg/cryptorunner')
-    },
-    {
-      id: 'link3',
-      title: 'Подпишись на Telegram канал',
-      reward: '+5 энергии',
-      completed: false,
-      icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://t.me/ratpythia')
-    },
-    {
-      id: 'play-game',
-      title: 'Начни свою первую игру',
-      reward: '+15 энергии',
-      completed: false,
-      icon: <Play className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open(`https://backendforgames.com/runner/?walletAddress=Value2`)
-    },
-  ];
+  useEffect(() => {
+    if (accessToken) {
+      getProfile(String(accessToken)).then((r) => {
+        setProfile(r);
+      });
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    getTasks()
+      .then((r) => setTasks(r))
+      .catch((e) => console.error('Failed to load tasks:', e));
+  }, []);
+ 
 
   // useEffect(() => {
   //   if (!isConnected) {
@@ -71,20 +39,16 @@ export function ProfilePage() {
   // }, [isConnected, navigate]);
 
   // const { pythiaBalance, maxEnergy, currentEnergy, walletAddress } = useWalletStore();
-  const { userProfile } = useAuthStore();
 
   const location = useLocation();
   const showNavbar = !['/', '/setup'].includes(location.pathname);
 
   
-  const avatar = {}
-  // useEffect(() => {
-  //   if (!isConnected) {
-  //     navigate('/');
-  //   }
-  // }, [isConnected, navigate]);
-  
+  const avatar = profile ? GAME_AVATARS.find(avatar => avatar.id === profile?.characterClass) : null;
+
+
   const energyPercentage = (currentEnergy / maxEnergy) * 100;
+
 
   return (
     <>
@@ -95,37 +59,33 @@ export function ProfilePage() {
       <div className="max-w-xl mx-auto">
         <div className="glass-effect pixel-corners p-4 md:p-6 mb-6">
           <div className="flex flex-col items-center gap-4 mb-8">
-            {/* TODO: Did we talk about avatar :/ ? */}
-            {/* <div 
-              className="w-16 h-16 md:w-20 md:h-20 glass-effect pixel-corners
+            <div 
+              className="w-16 h-16 md:w-20 md:h-20 
                        flex items-center justify-center"
               style={{ 
-                backgroundColor: avatar.bgColor,
-                boxShadow: `0 0 10px ${avatar.borderColor}` 
+                backgroundColor: avatar?.bgColor,
+                boxShadow: `0 0 10px ${avatar?.borderColor}` 
               }}
             >
-              {userProfile && React.createElement(avatar.icon, {
+              {profile && React.createElement(avatar?.icon, {
                 size: 32,
-                style: { color: avatar.borderColor },
+                style: { color: avatar?.borderColor },
                 strokeWidth: 1.5
               })}
-            </div> */}
+            </div>
             <div className="flex-1">
-              <h2 className="text-sm md:text-base text-[#00ff00] tracking-wider mb-2">
-                {userProfile?.username!.toUpperCase()}
+              <h2 className="text-sm md:text-base text-center text-[#00ff00] tracking-wider mb-2">
+                {profile?.username!.toUpperCase()}
               </h2>
               <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: avatar.borderColor }}>
-                  {avatar.name}
+                <span className="text-xs" style={{ color: avatar?.borderColor }}>
+                  {avatar?.name}
                 </span>
               </div>
               <div className="flex-1">
-                <h2 className="text-sm md:text-base text-[#00ff00] tracking-wider mb-2">
-                  {userProfile?.username.toUpperCase()}
-                </h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: userProfile?.avatar.borderColor }}>
-                    {userProfile?.avatar.name}
+                  <span className="text-xs" style={{ color: avatar?.bgColor }}>
+                    {profile?.avatar?.name}
                   </span>
                 </div>
               </div>
@@ -249,12 +209,16 @@ export function ProfilePage() {
             </button>
           </div>
 
-          {/* Секция с заданиями */}
           <div className="glass-effect pixel-corners p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Target className="w-6 h-6 text-[#00ff00]" />
-              <h2 className="text-lg text-[#00ff00]">Ежедневные задания</h2>
-            </div>
+            {
+              tasks.length > 0
+              ? <div className="flex items-center gap-3 mb-6">
+                <Target className="w-6 h-6 text-[#00ff00]" />
+                <h2 className="text-lg text-[#00ff00]">Ежедневные задания</h2>
+              </div>
+              : null
+            }
+            
             
             <div className="space-y-4">
               {tasks.map((task) => (

@@ -15,7 +15,7 @@ export const GAME_AVATARS = [
     icon: Shield,
     description: 'Guardian of digital realms',
     borderColor: '#00ffff',
-    bgColor: '#00ffff15'
+    bgColor: '#00f15'
   },
   {
     id: CharacterClass["NEON_STRIKER"],

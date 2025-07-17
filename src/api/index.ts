@@ -59,6 +59,15 @@ export interface User {
   levelInd: number;
 }
 
+interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  link?: string;
+  condition: string;
+  value: number;
+}
+
 export interface Player {
   id: string;
   rank: string;
@@ -133,4 +142,18 @@ export async function updateProfile(data: { username: string; characterClass: Ch
     }
   });
   return res.data;
+}
+
+
+export async function getTasks() {
+  const response = await api.get<IResponse<Task[]>>('/api/tasks');
+  return response.data;
+}
+
+export async function logout(accessToken: string): Promise<void> {
+  await api.post('/api/auth/logout', {}, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
 }

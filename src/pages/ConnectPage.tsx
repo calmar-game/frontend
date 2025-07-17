@@ -65,7 +65,6 @@ export function ConnectPage() {
     let user: User | null = null;
     try {
       user = await loginUser(walletAddress, signature, nonce);
-      alert("login success")
       setAccessToken(user.accessToken);
       return;
     } catch (err: any) {

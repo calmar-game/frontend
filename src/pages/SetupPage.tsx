@@ -7,7 +7,7 @@ import { getProfile, updateProfile } from '../api';
 
 export function SetupPage() {
   const navigate = useNavigate();
-  const { setUserProfile, accessToken } = useAuthStore();
+  const { accessToken } = useAuthStore();
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<CharacterClass>(CharacterClass.CYBER_SENTINEL); // default
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export function SetupPage() {
   const getMe = () => {
     getProfile(String(accessToken)).then((r) => {
       if (r.isProfileCompleted === true) {
-        navigate("/runner");
+        navigate("/profile");
         // window.location.href = "/runner"
       }
     }).catch((err) => {
@@ -62,7 +62,8 @@ export function SetupPage() {
       await updateProfile({
         username,
         characterClass: selectedAvatar,
-      }, String(accessToken))
+      }, String(accessToken));
+      navigate("/profile");
       // await setUserProfile({
       //   username,
       //   characterClass: selectedAvatar,
