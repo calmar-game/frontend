@@ -2,7 +2,7 @@ import axios from 'axios';
 import { CharacterClass } from '../constants/avatars';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://backendforgames.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ api.interceptors.response.use(
       original._retry = true;
 
       try {
-        const res = await fetch('http://localhost:8000/api/auth/refresh', {
+        const res = await fetch('https://backendforgames.com/api/auth/refresh', {
           method: 'POST',
           credentials: 'include',
         });
@@ -156,4 +156,24 @@ export async function logout(accessToken: string): Promise<void> {
       Authorization: `Bearer ${accessToken}`
     }
   });
+}
+
+export async function gameLogin(
+  username: string,
+  password: string
+): Promise<IResponse<User>> {
+  const response = await api.post<IResponse<User>>('/api/users/login', {
+    username,
+    password
+  });
+  return response.data;
+}
+
+export async function getGameToken(accessToken: string): Promise<IResponse<{ accessToken: string }>> {
+  const response = await api.get<IResponse<{ accessToken: string }>>('/api/users/game/token', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  return response.data;
 }

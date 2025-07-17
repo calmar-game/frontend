@@ -6,7 +6,7 @@ import { useWalletStore } from '../store/walletStore';
 import { useAuthStore } from '../store/authStore';
 import { Navbar } from '../components/Navbar';
 import { useEffect, useState } from 'react';
-import { getProfile, getTasks } from '../api';
+import { getGameToken, getProfile, getTasks } from '../api';
 import React from 'react';
 
 
@@ -14,8 +14,18 @@ export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const { accessToken } = useAuthStore();
   const { pythiaBalance } = useWalletStore();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [gameAccessToken, setGameAccessToken] = useState<string | null>(null);
+  const [tasks, setTasks] = useState([]);
+
   const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (accessToken) {
+      getGameToken(String(accessToken)).then((r) => {
+        setGameAccessToken(String(r));
+      })
+    }
+  }, [accessToken]);
 
   useEffect(() => {
     if (accessToken) {
@@ -193,22 +203,28 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <button 
-              className={`w-full p-4 md:p-6 pixel-corners
-                       flex items-center justify-center gap-3 text-base md:text-lg font-bold
-                       transition-all duration-300 ${
-                        profile?.energyCurrent > 0 
-                           ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
-                           : 'bg-gray-700 text-gray-300 cursor-not-allowed'
-                       }`}
-              onClick={() => {
-                window.open(`https://backendforgames.com/runner/?walletAddress=Value2`, '_blank');
-              }}
-              disabled={profile?.energyCurrent === 0}
-            >
-              <Play className="w-6 h-6" fill="currentColor" />
-              {profile?.energyCurrent > 0 ? 'START GAME' : 'NO ENERGY'}
-            </button>
+            {
+              gameAccessToken !== null
+              ? <button 
+                className={`w-full p-4 md:p-6 pixel-corners
+                        flex items-center justify-center gap-3 text-base md:text-lg font-bold
+                        transition-all duration-300 ${
+                          profile?.energyCurrent > 0 
+                            ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
+                            : 'bg-gray-700 text-gray-300 cursor-not-allowed'
+                        }`}
+                onClick={() => {
+                  
+                  window.open(`http://game-runner.infra.orb.local?walletAddress=${gameAccessToken}`, '_blank');
+                }}
+                disabled={profile?.energyCurrent === 0}
+              >
+                <Play className="w-6 h-6" fill="currentColor" />
+                {profile?.energyCurrent > 0 ? 'START GAME' : 'NO ENERGY'}
+              </button>
+              : null
+            }
+            
           </div>
 
           <div className="glass-effect pixel-corners p-4 md:p-6">
