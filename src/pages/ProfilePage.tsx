@@ -205,27 +205,33 @@ export function ProfilePage() {
               </div>
             </div>
 
+
             {
-              gameAccessToken !== null
-              ? <button 
-                className={`w-full p-4 md:p-6 pixel-corners
-                        flex items-center justify-center gap-3 text-base md:text-lg font-bold
-                        transition-all duration-300 ${
-                          profile?.energyCurrent > 0 
-                            ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
-                            : 'bg-gray-700 text-gray-300 cursor-not-allowed'
-                        }`}
-                onClick={() => {
-                  
-                  window.open(`https://backendforgames.com/runner?walletAddress=${gameAccessToken}`, '_blank');
-                }}
-                disabled={profile?.energyCurrent === 0}
-              >
-                <Play className="w-6 h-6" fill="currentColor" />
-                {profile?.energyCurrent > 0 ? 'START GAME' : 'NO ENERGY'}
-              </button>
-              : null
-            }
+  gameAccessToken !== null ? (
+    profile?.energyCurrent > 0 ? (
+      <a
+        href={`https://backendforgames.com/runner?walletAddress=${gameAccessToken}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full p-4 md:p-6 pixel-corners
+                   flex items-center justify-center gap-3 text-base md:text-lg font-bold
+                   transition-all duration-300 bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]"
+      >
+        <Play className="w-6 h-6" fill="currentColor" />
+        START GAME
+      </a>
+    ) : (
+      <div
+        className="w-full p-4 md:p-6 pixel-corners
+                   flex items-center justify-center gap-3 text-base md:text-lg font-bold
+                   transition-all duration-300 bg-gray-700 text-gray-300 cursor-not-allowed"
+      >
+        <Play className="w-6 h-6" fill="currentColor" />
+        NO ENERGY
+      </div>
+    )
+  ) : null
+}
             
           </div>
 
