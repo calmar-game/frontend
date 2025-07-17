@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, X, Trophy, User, Loader2 } from 'lucide-react';
-import { useWallet } from '../context/WalletContext';
-import { useNavigate } from 'react-router-dom';
-import { WalletMultiButton } from '../context/WalletContext';
+import { Menu, X, Trophy, User } from 'lucide-react';
+import { WalletButtonWithSession } from './WalletMultiButton';
+// import { useNavigate } from 'react-router-dom';
+// import { WalletMultiButton } from '../context/WalletContext';
+// import { useWalletStore } from '../store/walletStore';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { walletAddress, isLoading, isConnected } = useWallet();
-  const navigate = useNavigate();
+  // const { walletAddress, isLoading, isConnected } = useWalletStore();
+  // const navigate = useNavigate();
 
   return (
-    <>
+    <div className="h-fit">
       <div className="fixed top-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-b border-[#00ff00]/30 z-50">
         <div className="max-w-4xl mx-auto flex items-center justify-between p-4">
-          <NavLink to="/" className="text-[#00ff00] font-medium">CryptoRunner</NavLink>
+          <NavLink to="/runner" className="text-[#00ff00] font-medium">Squid Runner</NavLink>
           
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-3">
-              <WalletMultiButton className="px-3 py-1.5 rounded-lg bg-[#00ff00]/10 hover:bg-[#00ff00]/20 transition-colors
+              <WalletButtonWithSession className="px-3 py-1.5 rounded-lg bg-[#00ff00]/10 hover:bg-[#00ff00]/20 transition-colors
                          flex items-center gap-2 text-[#00ff00] text-sm font-medium" />
             </div>
             
@@ -44,7 +45,7 @@ export function Navbar() {
               {/* Show wallet info on mobile */}
               <div className="md:hidden flex flex-col gap-3 p-4 rounded-lg bg-[#00ff00]/5 mb-4">
                 <div className="flex items-center justify-between">
-                  <WalletMultiButton className="w-full px-3 py-1.5 rounded-lg bg-[#00ff00]/10 hover:bg-[#00ff00]/20 transition-colors
+                  <WalletButtonWithSession className="w-full px-3 py-1.5 rounded-lg bg-[#00ff00]/10 hover:bg-[#00ff00]/20 transition-colors
                              flex items-center justify-center gap-2 text-[#00ff00] text-sm font-medium" />
                 </div>
               </div>
@@ -79,6 +80,6 @@ export function Navbar() {
 
       {/* Top spacing for content */}
       <div className="h-16" />
-    </>
+    </div>
   );
 }

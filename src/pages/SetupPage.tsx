@@ -1,36 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, AlertCircle, Info } from 'lucide-react';
-import { GAME_AVATARS } from '../constants/avatars';
-import { useWallet } from '../context/WalletContext';
+import { GAME_AVATARS, CharacterClass } from '../constants/avatars';
+import { useAuthStore } from '../store/authStore';
+import { getProfile, updateProfile } from '../api';
 
 export function SetupPage() {
   const navigate = useNavigate();
-  const { setUserProfile } = useWallet();
+  const { setUserProfile, accessToken } = useAuthStore();
   const [username, setUsername] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(0);
+  const [selectedAvatar, setSelectedAvatar] = useState<CharacterClass>(CharacterClass.CYBER_SENTINEL); // default
   const [error, setError] = useState('');
-  const [showAvatarInfo, setShowAvatarInfo] = useState<number | null>(null);
+  const [showAvatarInfo, setShowAvatarInfo] = useState<CharacterClass | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const getMe = () => {
+    getProfile(String(accessToken)).then((r) => {
+      if (r.isProfileCompleted === true) {
+        navigate("/runner");
+        // window.location.href = "/runner"
+      }
+    }).catch((err) => {
+      console.info(err)
+    });
+  };
+
+  useEffect(() => {
+    if (accessToken === null) {
+      navigate("/");
+    } else {
+      getMe();
+    }
+  }, [accessToken, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username.trim()) {
       setError('Please enter a username');
       return;
     }
-    
+
     if (username.length < 3) {
       setError('Username must be at least 3 characters');
       return;
     }
-    
+
     if (username.length > 15) {
       setError('Username must be less than 15 characters');
       return;
     }
-    
+
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
       setError('Username can only contain letters, numbers, and underscores');
       return;
@@ -38,16 +58,20 @@ export function SetupPage() {
 
     setIsLoading(true);
 
-    try {
-      await setUserProfile({
+    // try {
+      await updateProfile({
         username,
-        avatar: GAME_AVATARS[selectedAvatar]
-      });
-      navigate('/profile');
-    } catch (error) {
-      setError('Failed to save profile');
-      setIsLoading(false);
-    }
+        characterClass: selectedAvatar,
+      }, String(accessToken))
+      // await setUserProfile({
+      //   username,
+      //   characterClass: selectedAvatar,
+      // });
+      // navigate('/runner');
+    // } catch (error) {
+    //   setError('Failed to save profile');
+    //   setIsLoading(false);
+    // }
   };
 
   return (
@@ -60,9 +84,7 @@ export function SetupPage() {
 
           {/* Username Input */}
           <div className="mb-8">
-            <label className="block text-[#00ff00] text-sm mb-2">
-              CHOOSE USERNAME
-            </label>
+            <label className="block text-[#00ff00] text-sm mb-2">CHOOSE USERNAME</label>
             <input
               type="text"
               value={username}
@@ -85,26 +107,24 @@ export function SetupPage() {
 
           {/* Avatar Selection */}
           <div className="mb-8">
-            <label className="block text-[#00ff00] text-sm mb-4">
-              SELECT CHARACTER CLASS
-            </label>
+            <label className="block text-[#00ff00] text-sm mb-4">SELECT CHARACTER CLASS</label>
             <div className="grid grid-cols-5 gap-3">
-              {GAME_AVATARS.map((avatar, index) => (
+              {GAME_AVATARS.map((avatar) => (
                 <div key={avatar.id} className="relative">
                   <button
                     type="button"
-                    onClick={() => setSelectedAvatar(index)}
-                    onMouseEnter={() => setShowAvatarInfo(index)}
+                    onClick={() => setSelectedAvatar(avatar.id)}
+                    onMouseEnter={() => setShowAvatarInfo(avatar.id)}
                     onMouseLeave={() => setShowAvatarInfo(null)}
                     className={`relative aspect-square overflow-hidden pixel-corners
                              transition-all duration-300 flex items-center justify-center
-                             ${selectedAvatar === index 
-                               ? 'ring-2' 
+                             ${selectedAvatar === avatar.id
+                               ? 'ring-2'
                                : 'opacity-50 hover:opacity-75 hover:ring-1'}`}
                     style={{ 
                       ringColor: avatar.borderColor,
                       backgroundColor: avatar.bgColor,
-                      boxShadow: selectedAvatar === index 
+                      boxShadow: selectedAvatar === avatar.id 
                         ? `0 0 10px ${avatar.borderColor}` 
                         : 'none'
                     }}
@@ -114,7 +134,7 @@ export function SetupPage() {
                       style: { color: avatar.borderColor },
                       strokeWidth: 1.5
                     })}
-                    {selectedAvatar === index && (
+                    {selectedAvatar === avatar.id && (
                       <div 
                         className="absolute inset-0 flex items-center justify-center"
                         style={{ backgroundColor: `${avatar.borderColor}20` }}
@@ -124,8 +144,7 @@ export function SetupPage() {
                     )}
                   </button>
 
-                  {/* Hover Info */}
-                  {showAvatarInfo === index && (
+                  {showAvatarInfo === avatar.id && (
                     <div 
                       className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-48 
                                glass-effect pixel-corners p-2 z-50"
@@ -148,12 +167,14 @@ export function SetupPage() {
           <div className="mb-8 glass-effect pixel-corners p-4">
             <div className="flex items-center gap-2 mb-2">
               <Info className="w-4 h-4 text-[#00ff00]" />
-              <span className="text-sm text-[#00ff00]">Selected: {GAME_AVATARS[selectedAvatar].name}</span>
+              <span className="text-sm text-[#00ff00]">Selected: {selectedAvatar}</span>
             </div>
-            <p className="text-xs text-gray-400">{GAME_AVATARS[selectedAvatar].description}</p>
+            <p className="text-xs text-gray-400">
+              {GAME_AVATARS.find((a) => a.id === selectedAvatar)?.description}
+            </p>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={isLoading}

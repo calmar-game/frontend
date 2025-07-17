@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
 import { Star, Trophy, Target, Zap, Play, Coins, CheckCircle2, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BuyPythiaModal } from '../components/BuyPythiaModal';
-import { useWallet } from '../context/WalletContext';
-
+import { GAME_AVATARS } from '../constants/avatars';
+import { useWalletStore } from '../store/walletStore';
+import { useAuthStore } from '../store/authStore';
+import { Navbar } from '../components/Navbar';
+import { useEffect, useState } from 'react';
 interface Task {
   id: string;
   title: string;
@@ -16,8 +18,8 @@ interface Task {
 
 export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-  const navigate = useNavigate();
-  const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected, userProfile } = useWallet();
+
+  const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected } = useWalletStore();
 
   const tasks: Task[] = [
     {
@@ -62,34 +64,60 @@ export function ProfilePage() {
     },
   ];
 
-  useEffect(() => {
-    if (!isConnected) {
-      navigate('/');
-    }
-  }, [isConnected, navigate]);
+  // useEffect(() => {
+  //   if (!isConnected) {
+  //     navigate('/');
+  //   }
+  // }, [isConnected, navigate]);
+
+  // const { pythiaBalance, maxEnergy, currentEnergy, walletAddress } = useWalletStore();
+  const { userProfile } = useAuthStore();
+
+  const location = useLocation();
+  const showNavbar = !['/', '/setup'].includes(location.pathname);
+
+  
+  const avatar = {}
+  // useEffect(() => {
+  //   if (!isConnected) {
+  //     navigate('/');
+  //   }
+  // }, [isConnected, navigate]);
   
   const energyPercentage = (currentEnergy / maxEnergy) * 100;
 
   return (
     <>
-      <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
-        <div className="max-w-xl mx-auto">
-          {/* Основной профиль */}
-          <div className="glass-effect pixel-corners p-4 md:p-6 mb-6">
-            <div className="flex items-center gap-4 mb-8">
-              <div 
-                className="w-16 h-16 md:w-20 md:h-20 glass-effect pixel-corners
-                         flex items-center justify-center"
-                style={{ 
-                  backgroundColor: userProfile?.avatar.bgColor,
-                  boxShadow: `0 0 10px ${userProfile?.avatar.borderColor}` 
-                }}
-              >
-                {userProfile && React.createElement(userProfile.avatar.icon, {
-                  size: 32,
-                  style: { color: userProfile.avatar.borderColor },
-                  strokeWidth: 1.5
-                })}
+      {showNavbar && <Navbar />}
+    
+    
+    <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
+      <div className="max-w-xl mx-auto">
+        <div className="glass-effect pixel-corners p-4 md:p-6 mb-6">
+          <div className="flex flex-col items-center gap-4 mb-8">
+            {/* TODO: Did we talk about avatar :/ ? */}
+            {/* <div 
+              className="w-16 h-16 md:w-20 md:h-20 glass-effect pixel-corners
+                       flex items-center justify-center"
+              style={{ 
+                backgroundColor: avatar.bgColor,
+                boxShadow: `0 0 10px ${avatar.borderColor}` 
+              }}
+            >
+              {userProfile && React.createElement(avatar.icon, {
+                size: 32,
+                style: { color: avatar.borderColor },
+                strokeWidth: 1.5
+              })}
+            </div> */}
+            <div className="flex-1">
+              <h2 className="text-sm md:text-base text-[#00ff00] tracking-wider mb-2">
+                {userProfile?.username!.toUpperCase()}
+              </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-xs" style={{ color: avatar.borderColor }}>
+                  {avatar.name}
+                </span>
               </div>
               <div className="flex-1">
                 <h2 className="text-sm md:text-base text-[#00ff00] tracking-wider mb-2">
@@ -270,6 +298,8 @@ export function ProfilePage() {
           // Здесь можно обновить баланс
         }}
       />
+    
+    </div>
     </>
   );
 }
