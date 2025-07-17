@@ -7,8 +7,6 @@ interface WalletState {
   isConnected: boolean;
   publicKey: PublicKey | null;
   pythiaBalance: number | null;
-  currentEnergy: number;
-  maxEnergy: number;
   setWalletConnection: (data: {
     isConnected: boolean;
     publicKey: PublicKey;
@@ -17,18 +15,11 @@ interface WalletState {
   refreshBalance: () => Promise<void>;
 }
 
-const calculateMaxEnergy = (pythia: number): number => {
-  if (pythia >= 300) return 100;
-  if (pythia >= 100) return 60;
-  return 30;
-};
 
 export const useWalletStore = create<WalletState>((set, get) => ({
   isConnected: false,
   publicKey: null,
   pythiaBalance: null,
-  currentEnergy: 0,
-  maxEnergy: 30,
 
   setWalletConnection: ({ isConnected, publicKey }) => {
     set({ isConnected, publicKey });
@@ -37,8 +28,6 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   setBalance: (pythia) => {
     set({
       pythiaBalance: pythia,
-      currentEnergy: calculateMaxEnergy(pythia),
-      maxEnergy: calculateMaxEnergy(pythia),
     });
   },
 

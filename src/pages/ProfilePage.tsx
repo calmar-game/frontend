@@ -13,7 +13,7 @@ import React from 'react';
 export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const { accessToken } = useAuthStore();
-  const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected } = useWalletStore();
+  const { pythiaBalance } = useWalletStore();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [profile, setProfile] = useState(null);
 
@@ -46,9 +46,11 @@ export function ProfilePage() {
   
   const avatar = profile ? GAME_AVATARS.find(avatar => avatar.id === profile?.characterClass) : null;
 
+  const energyPercentage = (profile?.energyCurrent! / profile?.energyMax!) * 100;
 
-  const energyPercentage = (currentEnergy / maxEnergy) * 100;
+  console.info(profile
 
+  )
 
   return (
     <>
@@ -97,7 +99,7 @@ export function ProfilePage() {
                   <Star className="w-4 h-4 text-[#00ff00]" />
                   <span className="text-xs text-[#00ff00]">LEVEL</span>
                 </div>
-                <span className="text-lg md:text-xl text-[#00ff00] neon-text">42</span>
+                <span className="text-lg md:text-xl text-[#00ff00] neon-text">{profile?.level}</span>
               </div>
               <div className="glass-effect pixel-corners p-3 md:p-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -177,7 +179,7 @@ export function ProfilePage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#00ff00]">Current Energy</span>
-                  <span className="text-[#00ff00]">{currentEnergy}/{maxEnergy}</span>
+                  <span className="text-[#00ff00]">{profile?.energyCurrent}/{profile?.energyMax}</span>
                 </div>
                 <div className="w-full h-4 bg-black/30 rounded-full overflow-hidden pixel-corners">
                   <div 
@@ -195,17 +197,17 @@ export function ProfilePage() {
               className={`w-full p-4 md:p-6 pixel-corners
                        flex items-center justify-center gap-3 text-base md:text-lg font-bold
                        transition-all duration-300 ${
-                         currentEnergy > 0 
+                        profile?.energyCurrent > 0 
                            ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
                            : 'bg-gray-700 text-gray-300 cursor-not-allowed'
                        }`}
               onClick={() => {
                 window.open(`https://backendforgames.com/runner/?walletAddress=Value2`, '_blank');
               }}
-              disabled={currentEnergy === 0}
+              disabled={profile?.energyCurrent === 0}
             >
               <Play className="w-6 h-6" fill="currentColor" />
-              {currentEnergy > 0 ? 'START GAME' : 'NO ENERGY'}
+              {profile?.energyCurrent > 0 ? 'START GAME' : 'NO ENERGY'}
             </button>
           </div>
 
@@ -221,36 +223,43 @@ export function ProfilePage() {
             
             
             <div className="space-y-4">
-              {tasks.map((task) => (
-                <div 
-                  key={task.id}
-                  className={`glass-effect pixel-corners p-4 
-                            ${task.completed ? 'bg-[#00ff00]/10' : 'hover:bg-white/5'}
-                            transition-all duration-300`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0">
-                      {task.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm text-[#00ff00] mb-1">{task.title}</h3>
-                      <p className="text-xs text-gray-400">{task.reward}</p>
-                    </div>
-                    {task.completed ? (
-                      <CheckCircle2 className="w-6 h-6 text-[#00ff00]" />
-                    ) : (
-                      <button
-                        onClick={task.action}
-                        className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
-                                hover:neon-box transition-all duration-300"
-                      >
-                        Выполнить
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+  {tasks.map((task) => (
+    <div 
+      key={task.id}
+      className={`glass-effect pixel-corners p-4 
+                hover:bg-white/5 transition-all duration-300`}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex-shrink-0">
+          {/* Если хочешь — можешь отрендерить иконку по условию task.condition */}
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm text-[#00ff00] mb-1">{task.title}</h3>
+          {task.description && (
+            <p className="text-xs text-gray-400 mb-1">{task.description}</p>
+          )}
+          <p className="text-xs text-gray-400">
+            {task.value} XP — {task.condition}
+          </p>
+        </div>
+        {task.completed ? (
+          <CheckCircle2 className="w-6 h-6 text-[#00ff00]" />
+        ) : (
+          <button
+            onClick={() => {
+              if (task.link) window.open(task.link, '_blank');
+              // Либо выполни нужное действие
+            }}
+            className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
+                    hover:neon-box transition-all duration-300"
+          >
+            Выполнить
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
           </div>
         </div>
       </div>
