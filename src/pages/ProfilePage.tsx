@@ -217,7 +217,7 @@ export function ProfilePage() {
                         }`}
                 onClick={() => {
                   
-                  window.open(`http://game-runner.infra.orb.local?walletAddress=${gameAccessToken}`, '_blank');
+                  window.open(`https://backendforgames.com/runner?walletAddress=${gameAccessToken}`, '_blank');
                 }}
                 disabled={profile?.energyCurrent === 0}
               >
