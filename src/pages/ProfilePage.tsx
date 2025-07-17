@@ -79,12 +79,14 @@ export function ProfilePage() {
                 boxShadow: `0 0 10px ${avatar?.borderColor}` 
               }}
             >
-              {profile && React.createElement(avatar?.icon, {
-                size: 32,
-                style: { color: avatar?.borderColor },
-                strokeWidth: 1.5
-              })}
-            </div>
+              {profile && avatar?.icon && (
+                React.createElement(avatar.icon, {
+                  size: 32,
+                  style: { color: avatar.borderColor },
+                  strokeWidth: 1.5
+                })
+              )}
+                          </div>
             <div className="flex-1">
               <h2 className="text-sm md:text-base text-center text-[#00ff00] tracking-wider mb-2">
                 {profile?.username!.toUpperCase()}
