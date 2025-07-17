@@ -210,7 +210,7 @@ export function ProfilePage() {
   gameAccessToken !== null ? (
     profile?.energyCurrent > 0 ? (
       <a
-        href={`https://backendforgames.com/runner?walletAddress=${gameAccessToken}`}
+        href={`https://backendforgames.com/runner/?walletAddress=${gameAccessToken}`}
         target="_blank"
         rel="noopener noreferrer"
         className="w-full p-4 md:p-6 pixel-corners
