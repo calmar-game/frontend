@@ -4,11 +4,9 @@ import { ConnectPage } from './pages/ConnectPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { SetupPage } from './pages/SetupPage';
-import { Navbar } from './components/Navbar';
 // import { WalletContextProvider, useWallet } from './context/WalletContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { WalletProvider } from './context/WalletContext';
-import { UnityPlayer } from './pages/UnityPlayer';
 
 // function ProtectedRoute({ children }: { children: React.ReactNode }) {
 //   const { isConnected, userProfile } = useWallet();
@@ -40,11 +38,6 @@ function AppContent() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <ProfilePage />
-          </ProtectedRoute>
-        } />
-        <Route path="/runner" element={
-          <ProtectedRoute>
-            <UnityPlayer />
           </ProtectedRoute>
         } />
         <Route path="/leaderboard" element={
