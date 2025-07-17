@@ -1,16 +1,24 @@
 import { Zap, Shield, Sword, Crown, Star } from 'lucide-react';
 
+export enum CharacterClass {
+  CYBER_SENTINEL = 'Cyber_Sentinel',
+  NEON_STRIKER = 'Neon_Striker',
+  QUANTUM_KNIGHT = 'Quantum_Knight',
+  VOID_SOVEREIGN = 'Void_Sovereign',
+  MATRIX_PIONEER = 'Matrix_Pioneer',
+}  
+
 export const GAME_AVATARS = [
   {
-    id: 1,
+    id: CharacterClass["CYBER_SENTINEL"],
     name: 'Cyber Sentinel',
     icon: Shield,
     description: 'Guardian of digital realms',
     borderColor: '#00ffff',
-    bgColor: '#00ffff15'
+    bgColor: '#00f15'
   },
   {
-    id: 2,
+    id: CharacterClass["NEON_STRIKER"],
     name: 'Neon Striker',
     icon: Zap,
     description: 'Master of lightning speed',
@@ -18,7 +26,7 @@ export const GAME_AVATARS = [
     bgColor: '#ff00ff15'
   },
   {
-    id: 3,
+    id: CharacterClass['QUANTUM_KNIGHT'],
     name: 'Quantum Knight',
     icon: Sword,
     description: 'Warrior of parallel chains',
@@ -26,7 +34,7 @@ export const GAME_AVATARS = [
     bgColor: '#00ff0015'
   },
   {
-    id: 4,
+    id: CharacterClass["VOID_SOVEREIGN"],
     name: 'Void Sovereign',
     icon: Crown,
     description: 'Ruler of digital space',
@@ -34,7 +42,7 @@ export const GAME_AVATARS = [
     bgColor: '#ff990015'
   },
   {
-    id: 5,
+    id: CharacterClass["MATRIX_PIONEER"],
     name: 'Matrix Pioneer',
     icon: Star,
     description: 'Explorer of unknown protocols',

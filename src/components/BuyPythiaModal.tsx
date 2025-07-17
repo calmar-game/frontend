@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWallet as useAppWallet } from "../context/WalletContext";
+// import { useWallet as useAppWallet } from "../context/WalletContext";
 import { buyPythia } from "../utils/buyPythia";
 import { Dialog } from "@headlessui/react";
 import { Connection } from "@solana/web3.js";
 import { Loader2 } from "lucide-react";
+import { useWalletStore } from "../store/walletStore";
 
 const SOLANA_RPC = "https://clean-old-mountain.solana-mainnet.quiknode.pro/c2394ff78485f0cc2af2fd4eaf0a51574f59c2f0";
 const connection = new Connection(SOLANA_RPC);
@@ -17,7 +18,7 @@ interface BuyPythiaModalProps {
 
 export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalProps) {
     const { publicKey, sendTransaction } = useWallet();
-    const { refreshBalance } = useAppWallet();
+    const { refreshBalance } = useWalletStore();
     const [solAmount, setSolAmount] = useState(0.1);
     const [loading, setLoading] = useState(false);
     const [txId, setTxId] = useState("");

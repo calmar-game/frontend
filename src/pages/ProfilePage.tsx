@@ -1,103 +1,103 @@
-import React, { useEffect, useState } from 'react';
 import { Star, Trophy, Target, Zap, Play, Coins, CheckCircle2, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BuyPythiaModal } from '../components/BuyPythiaModal';
-import { useWallet } from '../context/WalletContext';
-
-interface Task {
-  id: string;
-  title: string;
-  reward: string;
-  completed: boolean;
-  icon: React.ReactNode;
-  action?: () => void;
-}
+import { GAME_AVATARS } from '../constants/avatars';
+import { useWalletStore } from '../store/walletStore';
+import { useAuthStore } from '../store/authStore';
+import { Navbar } from '../components/Navbar';
+import { useEffect, useState } from 'react';
+import { getGameToken, getProfile, getTasks } from '../api';
+import React from 'react';
 
 
 export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-  const navigate = useNavigate();
-  const { pythiaBalance, maxEnergy, currentEnergy, isLoading, isConnected, userProfile } = useWallet();
+  const { accessToken } = useAuthStore();
+  const { pythiaBalance } = useWalletStore();
+  const [gameAccessToken, setGameAccessToken] = useState<string | null>(null);
+  const [tasks, setTasks] = useState([]);
 
-  const tasks: Task[] = [
-    {
-      id: 'buy-pythia',
-      title: 'Пополни баланс PYTHIA на 100 токенов',
-      reward: '+30 энергии',
-      completed: pythiaBalance >= 100,
-      icon: <Coins className="w-5 h-5 text-[#00ff00]" />,
-      action: () => setIsBuyModalOpen(true)
-    },
-    {
-      id: 'link1',
-      title: 'Перейди на наш сайт',
-      reward: '+5 энергии',
-      completed: false,
-      icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://neiry.ai')
-    },
-    {
-      id: 'link2',
-      title: 'Подпишись на наш X (Twitter)',
-      reward: '+5 энергии',
-      completed: false,
-      icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://discord.gg/cryptorunner')
-    },
-    {
-      id: 'link3',
-      title: 'Подпишись на Telegram канал',
-      reward: '+5 энергии',
-      completed: false,
-      icon: <ExternalLink className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open('https://t.me/ratpythia')
-    },
-    {
-      id: 'play-game',
-      title: 'Начни свою первую игру',
-      reward: '+15 энергии',
-      completed: false,
-      icon: <Play className="w-5 h-5 text-[#00ff00]" />,
-      action: () => window.open(`https://backendforgames.com/runner/?walletAddress=Value2`)
-    },
-  ];
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
-    if (!isConnected) {
-      navigate('/');
+    if (accessToken) {
+      getGameToken(String(accessToken)).then((r) => {
+        setGameAccessToken(String(r));
+      })
     }
-  }, [isConnected, navigate]);
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (accessToken) {
+      getProfile(String(accessToken)).then((r) => {
+        setProfile(r);
+      });
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    getTasks()
+      .then((r) => setTasks(r))
+      .catch((e) => console.error('Failed to load tasks:', e));
+  }, []);
+ 
+
+  // useEffect(() => {
+  //   if (!isConnected) {
+  //     navigate('/');
+  //   }
+  // }, [isConnected, navigate]);
+
+  // const { pythiaBalance, maxEnergy, currentEnergy, walletAddress } = useWalletStore();
+
+  const location = useLocation();
+  const showNavbar = !['/', '/setup'].includes(location.pathname);
+
   
-  const energyPercentage = (currentEnergy / maxEnergy) * 100;
+  const avatar = profile ? GAME_AVATARS.find(avatar => avatar.id === profile?.characterClass) : null;
+
+  const energyPercentage = (profile?.energyCurrent! / profile?.energyMax!) * 100;
+
+  console.info(profile
+
+  )
 
   return (
     <>
-      <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
-        <div className="max-w-xl mx-auto">
-          {/* Основной профиль */}
-          <div className="glass-effect pixel-corners p-4 md:p-6 mb-6">
-            <div className="flex items-center gap-4 mb-8">
-              <div 
-                className="w-16 h-16 md:w-20 md:h-20 glass-effect pixel-corners
-                         flex items-center justify-center"
-                style={{ 
-                  backgroundColor: userProfile?.avatar.bgColor,
-                  boxShadow: `0 0 10px ${userProfile?.avatar.borderColor}` 
-                }}
-              >
-                {userProfile && React.createElement(userProfile.avatar.icon, {
-                  size: 32,
-                  style: { color: userProfile.avatar.borderColor },
-                  strokeWidth: 1.5
-                })}
+      {showNavbar && <Navbar />}
+    
+    
+    <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
+      <div className="max-w-xl mx-auto">
+        <div className="glass-effect pixel-corners p-4 md:p-6 mb-6">
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <div 
+              className="w-16 h-16 md:w-20 md:h-20 
+                       flex items-center justify-center"
+              style={{ 
+                backgroundColor: avatar?.bgColor,
+                boxShadow: `0 0 10px ${avatar?.borderColor}` 
+              }}
+            >
+              {profile && React.createElement(avatar?.icon, {
+                size: 32,
+                style: { color: avatar?.borderColor },
+                strokeWidth: 1.5
+              })}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-sm md:text-base text-center text-[#00ff00] tracking-wider mb-2">
+                {profile?.username!.toUpperCase()}
+              </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-xs" style={{ color: avatar?.borderColor }}>
+                  {avatar?.name}
+                </span>
               </div>
               <div className="flex-1">
-                <h2 className="text-sm md:text-base text-[#00ff00] tracking-wider mb-2">
-                  {userProfile?.username.toUpperCase()}
-                </h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: userProfile?.avatar.borderColor }}>
-                    {userProfile?.avatar.name}
+                  <span className="text-xs" style={{ color: avatar?.bgColor }}>
+                    {profile?.avatar?.name}
                   </span>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export function ProfilePage() {
                   <Star className="w-4 h-4 text-[#00ff00]" />
                   <span className="text-xs text-[#00ff00]">LEVEL</span>
                 </div>
-                <span className="text-lg md:text-xl text-[#00ff00] neon-text">42</span>
+                <span className="text-lg md:text-xl text-[#00ff00] neon-text">{profile?.level}</span>
               </div>
               <div className="glass-effect pixel-corners p-3 md:p-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -189,7 +189,7 @@ export function ProfilePage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#00ff00]">Current Energy</span>
-                  <span className="text-[#00ff00]">{currentEnergy}/{maxEnergy}</span>
+                  <span className="text-[#00ff00]">{profile?.energyCurrent}/{profile?.energyMax}</span>
                 </div>
                 <div className="w-full h-4 bg-black/30 rounded-full overflow-hidden pixel-corners">
                   <div 
@@ -203,62 +203,79 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <button 
-              className={`w-full p-4 md:p-6 pixel-corners
-                       flex items-center justify-center gap-3 text-base md:text-lg font-bold
-                       transition-all duration-300 ${
-                         currentEnergy > 0 
-                           ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
-                           : 'bg-gray-700 text-gray-300 cursor-not-allowed'
-                       }`}
-              onClick={() => {
-                window.open(`https://backendforgames.com/runner/?walletAddress=Value2`, '_blank');
-              }}
-              disabled={currentEnergy === 0}
-            >
-              <Play className="w-6 h-6" fill="currentColor" />
-              {currentEnergy > 0 ? 'START GAME' : 'NO ENERGY'}
-            </button>
+            {
+              gameAccessToken !== null
+              ? <button 
+                className={`w-full p-4 md:p-6 pixel-corners
+                        flex items-center justify-center gap-3 text-base md:text-lg font-bold
+                        transition-all duration-300 ${
+                          profile?.energyCurrent > 0 
+                            ? 'bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]' 
+                            : 'bg-gray-700 text-gray-300 cursor-not-allowed'
+                        }`}
+                onClick={() => {
+                  
+                  window.open(`http://game-runner.infra.orb.local?walletAddress=${gameAccessToken}`, '_blank');
+                }}
+                disabled={profile?.energyCurrent === 0}
+              >
+                <Play className="w-6 h-6" fill="currentColor" />
+                {profile?.energyCurrent > 0 ? 'START GAME' : 'NO ENERGY'}
+              </button>
+              : null
+            }
+            
           </div>
 
-          {/* Секция с заданиями */}
           <div className="glass-effect pixel-corners p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Target className="w-6 h-6 text-[#00ff00]" />
-              <h2 className="text-lg text-[#00ff00]">Ежедневные задания</h2>
-            </div>
+            {
+              tasks.length > 0
+              ? <div className="flex items-center gap-3 mb-6">
+                <Target className="w-6 h-6 text-[#00ff00]" />
+                <h2 className="text-lg text-[#00ff00]">Ежедневные задания</h2>
+              </div>
+              : null
+            }
+            
             
             <div className="space-y-4">
-              {tasks.map((task) => (
-                <div 
-                  key={task.id}
-                  className={`glass-effect pixel-corners p-4 
-                            ${task.completed ? 'bg-[#00ff00]/10' : 'hover:bg-white/5'}
-                            transition-all duration-300`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0">
-                      {task.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm text-[#00ff00] mb-1">{task.title}</h3>
-                      <p className="text-xs text-gray-400">{task.reward}</p>
-                    </div>
-                    {task.completed ? (
-                      <CheckCircle2 className="w-6 h-6 text-[#00ff00]" />
-                    ) : (
-                      <button
-                        onClick={task.action}
-                        className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
-                                hover:neon-box transition-all duration-300"
-                      >
-                        Выполнить
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+  {tasks.map((task) => (
+    <div 
+      key={task.id}
+      className={`glass-effect pixel-corners p-4 
+                hover:bg-white/5 transition-all duration-300`}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex-shrink-0">
+          {/* Если хочешь — можешь отрендерить иконку по условию task.condition */}
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm text-[#00ff00] mb-1">{task.title}</h3>
+          {task.description && (
+            <p className="text-xs text-gray-400 mb-1">{task.description}</p>
+          )}
+          <p className="text-xs text-gray-400">
+            {task.value} XP — {task.condition}
+          </p>
+        </div>
+        {task.completed ? (
+          <CheckCircle2 className="w-6 h-6 text-[#00ff00]" />
+        ) : (
+          <button
+            onClick={() => {
+              if (task.link) window.open(task.link, '_blank');
+              // Либо выполни нужное действие
+            }}
+            className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
+                    hover:neon-box transition-all duration-300"
+          >
+            Выполнить
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
           </div>
         </div>
       </div>
@@ -270,6 +287,8 @@ export function ProfilePage() {
           // Здесь можно обновить баланс
         }}
       />
+    
+    </div>
     </>
   );
 }

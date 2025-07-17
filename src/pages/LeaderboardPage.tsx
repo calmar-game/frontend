@@ -1,18 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Trophy, Crown, Medal } from "lucide-react";
 import { getTopPlayers, Player } from "../api";
+import { useLocation } from "react-router-dom";
+import { Navbar } from "../components/Navbar";
 
 
 export function LeaderboardPage() {
   const [players, setPlayers] = useState<Player[]>([]);
+  const location = useLocation();
+  const showNavbar = !['/', '/setup'].includes(location.pathname);
 
+  
   useEffect(() => {
     getTopPlayers()
       .then((res) => setPlayers(res))
       .catch((err) => console.error(err));
   }, []);
 
-  return (
+  return <>
+      {showNavbar && <Navbar />}
+
+
     <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
       <div className="max-w-xl mx-auto">
         <div className="glass-effect pixel-corners p-4 md:p-6">
@@ -79,7 +87,7 @@ export function LeaderboardPage() {
                         : "text-white"
                     }`}
                   >
-                    {player.score.toLocaleString()}
+                    {player.rank.toLocaleString()}
                   </span>
                 </div>
               ))
@@ -88,5 +96,5 @@ export function LeaderboardPage() {
         </div>
       </div>
     </div>
-  );
+  </>;
 }
