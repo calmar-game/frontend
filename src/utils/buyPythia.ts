@@ -1,5 +1,6 @@
 import { VersionedTransaction, Connection, PublicKey } from "@solana/web3.js";
 import api from "../api";
+import axios from "axios";
 
 const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
 const connection = new Connection(SOLANA_RPC);
@@ -16,7 +17,7 @@ export async function buyPythia(solAmount: number, userPublicKey: PublicKey) {
         console.log(`🔄 Getting quote for ${solAmount} SOL to PYTHIA swap...`);
 
         // 1. Get quote
-        const quoteResponse = await api.get(`https://lite-api.jup.ag/quote`, {
+        const quoteResponse = await axios.get(`${JUPITER_API}/quote`, {
             params: {
                 inputMint: SOL_MINT,
                 outputMint: PYTHIA_MINT,
@@ -34,7 +35,7 @@ export async function buyPythia(solAmount: number, userPublicKey: PublicKey) {
         console.log(`✅ Got quote. Expected output: ${quoteResponse.data.outAmount} PYTHIA`);
 
         // 2. Get swap transaction
-        const swapResponse = await api.post(`https://lite-api.jup.ag/swap/v1/swap`, {
+        const swapResponse = await axios.post(`${JUPITER_API}/swap`, {
             quoteResponse: quoteResponse.data,
             userPublicKey: userPublicKey.toBase58(),
             wrapUnwrapSOL: true,
