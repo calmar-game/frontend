@@ -23,7 +23,7 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (wallet.publicKey) {
-      setWalletConnection({ isConnected: true, publicKey: wallet.publicKey });
+      setWalletConnection({ isConnected: true, publicKey: wallet.publicKey, wallet: wallet.publicKey.toBase58() });
     }
   }, [wallet.publicKey, setWalletConnection]);
 
@@ -309,6 +309,9 @@ export function ProfilePage() {
           setIsBuyModalOpen(false);
           setTimeout(() => {
             refreshBalance();
+            getProfile(String(accessToken)).then((r) => {
+              setProfile(r);
+            });
           }, 10000);
         }}
       />
