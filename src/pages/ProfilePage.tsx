@@ -306,8 +306,10 @@ export function ProfilePage() {
         isOpen={isBuyModalOpen} 
         onClose={() => setIsBuyModalOpen(false)} 
         onSuccess={() => {
-          refreshBalance();
           setIsBuyModalOpen(false);
+          setTimeout(() => {
+            refreshBalance();
+          }, 10000);
         }}
       />
     
