@@ -60,7 +60,7 @@ export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalPro
             onClose();
         } catch (error) {
             console.error("Error buying PYTHIA:", error);
-            alert(`❌ Error purchasing PYTHIA: ${error.message}`);
+            alert(`❌ Error purchasing PYTHIA: ${error}`);
         } finally {
             setLoading(false);
         }

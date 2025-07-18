@@ -1,7 +1,9 @@
 // stores/useWalletStore.ts
 import { create } from 'zustand';
-import { PublicKey, Connection } from '@solana/web3.js';
+import { PublicKey, Connection, clusterApiUrl } from '@solana/web3.js';
 import { getAccount } from '@solana/spl-token';
+
+const SOLANA_RPC = "https://clean-old-mountain.solana-mainnet.quiknode.pro/c2394ff78485f0cc2af2fd4eaf0a51574f59c2f0";
 
 interface WalletState {
   isConnected: boolean;
@@ -15,6 +17,8 @@ interface WalletState {
   refreshBalance: () => Promise<void>;
 }
 
+const connection = new Connection(SOLANA_RPC);
+const mint = new PublicKey('CreiuhfwdWCN5mJbMJtA9bBpYQrQF2tCBuZwSPWfpump')
 
 export const useWalletStore = create<WalletState>((set, get) => ({
   isConnected: false,
@@ -36,10 +40,11 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     if (!publicKey) return;
 
     try {
-      const connection = new Connection('https://api.mainnet-beta.solana.com');
       const tokenAccounts = await connection.getTokenAccountsByOwner(publicKey, {
-        mint: new PublicKey('CreiuhfwdWCN5mJbMJtA9bBpYQrQF2tCBuZwSPWfpump'),
+        mint,
       });
+
+      console.log(tokenAccounts)
 
       if (tokenAccounts.value.length > 0) {
         const account = await getAccount(connection, tokenAccounts.value[0].pubkey);

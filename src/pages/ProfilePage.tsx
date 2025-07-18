@@ -8,16 +8,24 @@ import { Navbar } from '../components/Navbar';
 import { useEffect, useState } from 'react';
 import { getGameToken, getProfile, getTasks } from '../api';
 import React from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 
 export function ProfilePage() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const { accessToken } = useAuthStore();
-  const { pythiaBalance } = useWalletStore();
+  const wallet = useWallet();
+  const { pythiaBalance, refreshBalance, isConnected, setWalletConnection } = useWalletStore();
   const [gameAccessToken, setGameAccessToken] = useState<string | null>(null);
   const [tasks, setTasks] = useState([]);
 
   const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (wallet.publicKey) {
+      setWalletConnection({ isConnected: true, publicKey: wallet.publicKey });
+    }
+  }, [wallet.publicKey, setWalletConnection]);
 
   useEffect(() => {
     if (accessToken) {
@@ -40,6 +48,12 @@ export function ProfilePage() {
       .then((r) => setTasks(r))
       .catch((e) => console.error('Failed to load tasks:', e));
   }, []);
+
+  useEffect(() => {
+    if (isConnected) refreshBalance()
+  }, [isConnected, refreshBalance])
+
+  console.log(isConnected);
  
 
   // useEffect(() => {
@@ -292,7 +306,8 @@ export function ProfilePage() {
         isOpen={isBuyModalOpen} 
         onClose={() => setIsBuyModalOpen(false)} 
         onSuccess={() => {
-          // Здесь можно обновить баланс
+          refreshBalance();
+          setIsBuyModalOpen(false);
         }}
       />
     
