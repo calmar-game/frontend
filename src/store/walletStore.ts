@@ -1,8 +1,7 @@
 // stores/useWalletStore.ts
 import { create } from 'zustand';
-import { PublicKey, Connection, clusterApiUrl } from '@solana/web3.js';
+import { PublicKey, Connection } from '@solana/web3.js';
 import { getAccount } from '@solana/spl-token';
-import api from '../api';
 
 const SOLANA_RPC = "https://clean-old-mountain.solana-mainnet.quiknode.pro/c2394ff78485f0cc2af2fd4eaf0a51574f59c2f0";
 
@@ -10,11 +9,9 @@ interface WalletState {
   isConnected: boolean;
   publicKey: PublicKey | null;
   pythiaBalance: number | null;
-  wallet: string | null;
   setWalletConnection: (data: {
     isConnected: boolean;
     publicKey: PublicKey;
-    wallet: string;
   }) => void;
   setBalance: (pythia: number) => void;
   refreshBalance: () => Promise<void>;
@@ -27,10 +24,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   isConnected: false,
   publicKey: null,
   pythiaBalance: null,
-  wallet: null,
 
-  setWalletConnection: ({ isConnected, publicKey, wallet }) => {
-    set({ isConnected, publicKey, wallet });
+  setWalletConnection: ({ isConnected, publicKey }) => {
+    set({ isConnected, publicKey });
   },
 
   setBalance: (pythia) => {
@@ -42,8 +38,6 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   refreshBalance: async () => {
     const publicKey = get().publicKey;
     if (!publicKey) return;
-
-    const wallet = get().wallet;
 
     try {
       const tokenAccounts = await connection.getTokenAccountsByOwner(publicKey, {
@@ -57,8 +51,6 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         const newBalance = Number(account.amount) / Math.pow(10, 6);
         get().setBalance(newBalance);
       }
-
-      await api.post(`/api/${wallet}/set-energy`);
     } catch (e) {
       console.error('[refreshBalance] Failed:', e);
     }

@@ -23,7 +23,7 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (wallet.publicKey) {
-      setWalletConnection({ isConnected: true, publicKey: wallet.publicKey, wallet: wallet.publicKey.toBase58() });
+      setWalletConnection({ isConnected: true, publicKey: wallet.publicKey });
     }
   }, [wallet.publicKey, setWalletConnection]);
 
