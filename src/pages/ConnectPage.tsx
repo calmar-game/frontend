@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Gamepad2 } from 'lucide-react';
+import { Gamepad2, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   getNonce,
@@ -160,11 +160,26 @@ export function ConnectPage() {
         {!userProfile && (
           <button
             onClick={handleLoginFlow}
-            className="w-full mt-4 bg-[#00ff00]/20 text-[#00ff00] p-4 glass-effect pixel-corners hover:neon-box transition-all duration-300 tracking-wide"
+            className="w-full p-2 mt-4 md:p-4 pixel-corners
+                   flex items-center justify-center gap-3 text-base md:text-sm font-bold
+                   transition-all duration-300 bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]"
           >
             Sign In
           </button>
         )}
+        <a
+        href={`https://backendforgames.com/runner/?walletAddress=Guest`}
+        target="_blank"
+        rel="noopener noreferrer"
+        
+        className="flex gap-3 w-full mt-4 bg-[#00ff00]/20 text-[#00ff00] p-4 glass-effect pixel-corners hover:neon-box transition-all duration-300 tracking-wide items-center justify-center border border-[#00ff00] border-2"
+        style={{
+          border: '1px solid #00ff00',
+        }}
+        >
+          <Play className="w-6 h-6" fill="currentColor" />
+          PLAY AS GUEST
+        </a>
       </div>
     </div>
   );
