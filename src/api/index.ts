@@ -57,6 +57,10 @@ export interface User {
   score: number;
   level: number;
   levelInd: number;
+  characterClass: CharacterClass;
+  avatar: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Task {
@@ -145,8 +149,21 @@ export async function updateProfile(data: { username: string; characterClass: Ch
 }
 
 
-export async function getTasks() {
-  const response = await api.get<IResponse<Task[]>>('/api/tasks');
+export async function getTasks(accessToken: string) {
+  const response = await api.get<IResponse<Task[]>>('/api/tasks', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  return response.data;
+}
+
+export async function completeTask(accessToken: string, taskId: number): Promise<User> {
+  const response = await api.post<IResponse<Task>>(`/api/tasks/complete/${taskId}`, {}, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
   return response.data;
 }
 

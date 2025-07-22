@@ -1,14 +1,28 @@
-import { Star, Trophy, Target, Zap, Play, Coins, CheckCircle2, ExternalLink } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+import { Star, Target, Zap, Play, Coins, CheckCircle2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { BuyPythiaModal } from '../components/BuyPythiaModal';
 import { GAME_AVATARS } from '../constants/avatars';
 import { useWalletStore } from '../store/walletStore';
 import { useAuthStore } from '../store/authStore';
 import { Navbar } from '../components/Navbar';
 import { useEffect, useState } from 'react';
-import { getGameToken, getProfile, getTasks } from '../api';
+import { completeTask, getGameToken, getProfile, getTasks, User } from '../api';
 import React from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  link: string;
+  condition: string;
+  value: number;
+  createdAt: string;
+  updatedAt: string;
+  completed: boolean;
+}
+  
 
 
 export function ProfilePage() {
@@ -17,9 +31,11 @@ export function ProfilePage() {
   const wallet = useWallet();
   const { pythiaBalance, refreshBalance, isConnected, setWalletConnection } = useWalletStore();
   const [gameAccessToken, setGameAccessToken] = useState<string | null>(null);
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const [profile, setProfile] = useState(null);
+  const [tasksLoading, setTasksLoading] = useState(false);
+
+  const [profile, setProfile] = useState<User | null>(null);
 
   useEffect(() => {
     if (wallet.publicKey) {
@@ -32,22 +48,14 @@ export function ProfilePage() {
       getGameToken(String(accessToken)).then((r) => {
         setGameAccessToken(String(r));
       })
-    }
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (accessToken) {
       getProfile(String(accessToken)).then((r) => {
         setProfile(r);
       });
-    }
-  }, [accessToken]);
-
-  useEffect(() => {
-    getTasks()
+      getTasks(String(accessToken))
       .then((r) => setTasks(r))
       .catch((e) => console.error('Failed to load tasks:', e));
-  }, []);
+    }
+  }, [accessToken]);
 
   useEffect(() => {
     if (isConnected) refreshBalance()
@@ -72,9 +80,7 @@ export function ProfilePage() {
 
   const energyPercentage = (profile?.energyCurrent! / profile?.energyMax!) * 100;
 
-  console.info(profile
-
-  )
+  const currentPythiaBalance = pythiaBalance || 0;
 
   return (
     <>
@@ -148,7 +154,7 @@ export function ProfilePage() {
               {/* Energy Cards */}
               <div className="grid grid-cols-3 gap-2 mb-6">
                 <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                              ${pythiaBalance < 100 ? 'border border-[#00ff00]' : ''}`}>
+                              ${currentPythiaBalance < 100 ? 'border border-[#00ff00]' : ''}`}>
                   <div className="relative z-10">
                     <div className="flex items-center justify-center gap-1 mb-2">
                       <Zap className="w-4 h-4 text-[#00ff00]" />
@@ -156,13 +162,13 @@ export function ProfilePage() {
                     </div>
                     <div className="text-[10px] text-gray-400">0-100 $PYTHIA</div>
                   </div>
-                  {pythiaBalance < 100 && (
+                  {currentPythiaBalance < 100 && (
                     <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
                   )}
                 </div>
 
                 <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                              ${pythiaBalance >= 100 && pythiaBalance < 300 ? 'border border-[#00ff00]' : ''}`}>
+                              ${currentPythiaBalance >= 100 && currentPythiaBalance < 300 ? 'border border-[#00ff00]' : ''}`}>
                   <div className="relative z-10">
                     <div className="flex items-center justify-center gap-1 mb-2">
                       <Zap className="w-4 h-4 text-[#00ff00]" />
@@ -170,13 +176,13 @@ export function ProfilePage() {
                     </div>
                     <div className="text-[10px] text-gray-400">100-300 $PYTHIA</div>
                   </div>
-                  {pythiaBalance >= 100 && pythiaBalance < 300 && (
+                  {currentPythiaBalance >= 100 && currentPythiaBalance < 300 && (
                     <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
                   )}
                 </div>
 
                 <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                              ${pythiaBalance >= 300 ? 'border border-[#00ff00]' : ''}`}>
+                              ${currentPythiaBalance >= 300 ? 'border border-[#00ff00]' : ''}`}>
                   <div className="relative z-10">
                     <div className="flex items-center justify-center gap-1 mb-2">
                       <Zap className="w-4 h-4 text-[#00ff00]" />
@@ -184,7 +190,7 @@ export function ProfilePage() {
                     </div>
                     <div className="text-[10px] text-gray-400">300+ $PYTHIA</div>
                   </div>
-                  {pythiaBalance >= 300 && (
+                  {currentPythiaBalance >= 300 && (
                     <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
                   )}
                 </div>
@@ -222,7 +228,7 @@ export function ProfilePage() {
 
             {
   gameAccessToken !== null ? (
-    profile?.energyCurrent > 0 ? (
+    profile?.energyCurrent && profile?.energyCurrent > 0 ? (
       <a
         href={`https://backendforgames.com/runner/?walletAddress=${gameAccessToken}`}
         target="_blank"
@@ -284,9 +290,20 @@ export function ProfilePage() {
           <CheckCircle2 className="w-6 h-6 text-[#00ff00]" />
         ) : (
           <button
+            disabled={tasksLoading}
             onClick={() => {
               if (task.link) window.open(task.link, '_blank');
-              // Либо выполни нужное действие
+              if (!accessToken) return;
+              setTasksLoading(true);
+              completeTask(String(accessToken), task.id).then((r) => {
+                setProfile(r);
+              });
+              setTimeout(() => {
+                getTasks(String(accessToken))
+                .then((r) => setTasks(r))
+                .catch((e) => console.error('Failed to load tasks:', e));
+                setTasksLoading(false);
+              }, 2000);
             }}
             className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
                     hover:neon-box transition-all duration-300"
