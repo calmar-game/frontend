@@ -46,8 +46,8 @@ export const useTokenBalance = () => {
                 setBalance(0); // Если токенов нет
                 setIsLoading(false);
             } catch (error) {
-                console.error("Ошибка при получении баланса токена:", error);
-                setError("Не удалось получить баланс токена");
+                console.error("Error while fetching token balance:", error);
+                setError("Failed to fetch token balance");
                 setBalance(null);
                 setIsLoading(false);
             }

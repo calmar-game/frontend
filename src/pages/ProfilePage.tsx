@@ -260,7 +260,7 @@ export function ProfilePage() {
               tasks.length > 0
               ? <div className="flex items-center gap-3 mb-6">
                 <Target className="w-6 h-6 text-[#00ff00]" />
-                <h2 className="text-lg text-[#00ff00]">Ежедневные задания</h2>
+                <h2 className="text-lg text-[#00ff00]">Daily Tasks</h2>
               </div>
               : null
             }
@@ -308,7 +308,7 @@ export function ProfilePage() {
             className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
                     hover:neon-box transition-all duration-300"
           >
-            Выполнить
+            Complete
           </button>
         )}
       </div>
