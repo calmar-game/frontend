@@ -59,6 +59,8 @@ export interface User {
   levelInd: number;
   characterClass: CharacterClass;
   avatar: string;
+  place?: number;
+  totalUsers?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -86,7 +88,7 @@ export interface IResponse<T> {
 }
 
 export async function loginUser(wallet: string, signature: string, nonce: string): Promise<User | null> {
-    const data = await api.post<IResponse<User>>('/api/auth/login', {
+    const data = await api.post<User>('/api/auth/login', {
       walletAddress: wallet,
       signature,
       nonce,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { Star, Target, Zap, Play, Coins, CheckCircle2 } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Star, Target, Zap, Play, Coins, CheckCircle2, Trophy } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { BuyPythiaModal } from '../components/BuyPythiaModal';
 import { GAME_AVATARS } from '../constants/avatars';
 import { useWalletStore } from '../store/walletStore';
@@ -82,6 +82,10 @@ export function ProfilePage() {
 
   const currentPythiaBalance = pythiaBalance || 0;
 
+  // mock leaderboard data
+  const rank = profile?.place || 0;
+  const totalPlayers = profile?.totalUsers || 0;
+
   return (
     <>
       {showNavbar && <Navbar />}
@@ -125,7 +129,7 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
+            <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3">
               <div className="glass-effect pixel-corners p-3 md:p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Star className="w-4 h-4 text-[#00ff00]" />
@@ -133,7 +137,22 @@ export function ProfilePage() {
                 </div>
                 <span className="text-lg md:text-xl text-[#00ff00] neon-text">{profile?.level}</span>
               </div>
-              <div className="glass-effect pixel-corners p-3 md:p-4">
+              <Link
+                to="/leaderboard"
+                className="glass-effect pixel-corners p-3 md:p-4 block hover:neon-box transition-all duration-300"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-4 h-4 text-[#00ff00]" />
+                  <span className="text-xs text-[#00ff00]">Leaderboard</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-lg md:text-xl text-[#00ff00] neon-text">
+                    {rank} / {totalPlayers}
+                  </span>
+                </div>
+              </Link>  
+              <div className="glass-effect pixel-corners p-3 md:p-4 col-span-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Coins className="w-4 h-4 text-[#00ff00]" />
                   <span className="text-xs text-[#00ff00]">WEALTH</span>
@@ -202,6 +221,9 @@ export function ProfilePage() {
                          text-[#00ff00] hover:neon-box transition-all duration-300
                          flex items-center justify-center gap-2 mb-6"
                 onClick={() => setIsBuyModalOpen(true)}
+                style={{
+                  border: '1px solid #00ff00',
+                }}
               >
                 <Coins className="w-3 h-3" />
                 Buy More $PYTHIA
