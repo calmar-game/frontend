@@ -16,7 +16,7 @@ export function Navbar() {
           >
             <Zap className="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" fill="currentColor" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 group-hover:from-purple-300 group-hover:to-blue-300 transition-all">
-              Squid Runner
+              Solana Runner
             </span>
           </NavLink>
           

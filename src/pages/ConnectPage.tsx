@@ -106,7 +106,7 @@ export function ConnectPage() {
             
             <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-1">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-amber-200 to-yellow-200">
-                Squid Runner
+                Solana Runner
               </span>
             </h1>
             
