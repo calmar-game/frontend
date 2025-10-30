@@ -25,7 +25,7 @@ export async function buySolWithUsdc(usdcAmount: number, userPublicKey: PublicKe
                 amount: Math.floor(usdcAmount * 1e6), // USDC has 6 decimals
                 slippageBps: 100,
                 feeBps: 4,
-                onlyDirectRoutes: true, // Only direct routes
+                onlyDirectRoutes: false, // Only direct routes
             }
         });
 
