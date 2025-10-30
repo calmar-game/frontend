@@ -1,27 +1,23 @@
-import { VersionedTransaction, Connection, PublicKey } from "@solana/web3.js";
-import api from "../api";
+import { VersionedTransaction, PublicKey } from "@solana/web3.js";
 import axios from "axios";
-
-const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
-const connection = new Connection(SOLANA_RPC);
 
 // Jupiter API endpoint
 const JUPITER_API = "https://quote-api.jup.ag/v6";
 
 // Token addresses
 const SOL_MINT = "So11111111111111111111111111111111111111112";
-const USDT_MINT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"; // USDT on Solana
+const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC on Solana
 
-export async function buySolWithUsdt(usdtAmount: number, userPublicKey: PublicKey) {
+export async function buySolWithUsdc(usdcAmount: number, userPublicKey: PublicKey) {
     try {
-        console.log(`🔄 Getting quote for ${usdtAmount} USDT to SOL swap...`);
+        console.log(`🔄 Getting quote for ${usdcAmount} USDC to SOL swap...`);
 
-        // 1. Get quote (USDT -> SOL)
+        // 1. Get quote (USDC -> SOL)
         const quoteResponse = await axios.get(`${JUPITER_API}/quote`, {
             params: {
-                inputMint: USDT_MINT,
+                inputMint: USDC_MINT,
                 outputMint: SOL_MINT,
-                amount: Math.floor(usdtAmount * 1e6), // USDT has 6 decimals
+                amount: Math.floor(usdcAmount * 1e6), // USDC has 6 decimals
                 slippageBps: 100,
                 feeBps: 4,
                 onlyDirectRoutes: false, // Allow routes through other tokens if needed
@@ -52,7 +48,7 @@ export async function buySolWithUsdt(usdtAmount: number, userPublicKey: PublicKe
         return transaction;
 
     } catch (error) {
-        console.error("Error buying SOL with USDT:", error);
+        console.error("Error buying SOL with USDC:", error);
         throw error;
     }
 }

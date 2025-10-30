@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { buySolWithUsdt } from "../utils/buyPythia";
+import { buySolWithUsdc } from "../utils/buyPythia";
 import { Dialog } from "@headlessui/react";
 import { Connection } from "@solana/web3.js";
 import { Loader2, Coins, ExternalLink, X } from "lucide-react";
@@ -18,7 +18,7 @@ interface BuyPythiaModalProps {
 export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalProps) {
     const { publicKey, sendTransaction } = useWallet();
     const { refreshBalance } = useWalletStore();
-    const [usdtAmount, setUsdtAmount] = useState(10);
+    const [usdcAmount, setUsdcAmount] = useState(10);
     const [loading, setLoading] = useState(false);
     const [txId, setTxId] = useState("");
 
@@ -32,7 +32,7 @@ export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalPro
             setLoading(true);
             
             // Get the transaction
-            const transaction = await buySolWithUsdt(usdtAmount, publicKey);
+            const transaction = await buySolWithUsdc(usdcAmount, publicKey);
 
             console.log("Signing transaction...");
             const signature = await sendTransaction(transaction, connection, {
@@ -97,22 +97,22 @@ export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalPro
                     </h2>
                     
                     <p className="text-sm text-gray-400">
-                        Purchase SOL with USDT
+                        Purchase SOL with USDC
                     </p>
                 </div>
                 
                 {/* Amount Input */}
                 <div className="mb-6">
                     <label className="block text-white text-sm font-semibold mb-3">
-                        Amount (USDT)
+                        Amount (USDC)
                     </label>
                     <div className="relative">
                         <input
                             type="number"
                             min="1"
                             step="1"
-                            value={usdtAmount}
-                            onChange={(e) => setUsdtAmount(parseFloat(e.target.value))}
+                            value={usdcAmount}
+                            onChange={(e) => setUsdcAmount(parseFloat(e.target.value))}
                             className="w-full bg-slate-800/50 text-white px-4 py-3 rounded-lg
                                      border border-slate-700 focus:border-cyan-500/50
                                      focus:outline-none focus:ring-2 focus:ring-cyan-500/20
@@ -124,11 +124,11 @@ export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalPro
                             placeholder="10"
                         />
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">
-                            USDT
+                            USDC
                         </div>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
-                        Minimum: 1 USDT
+                        Minimum: 1 USDC
                     </p>
                 </div>
                 
@@ -152,7 +152,7 @@ export function BuyPythiaModal({ isOpen, onClose, onSuccess }: BuyPythiaModalPro
                     ) : (
                         <>
                             <Coins className="w-5 h-5" />
-                            Buy SOL for {usdtAmount} USDT
+                            Buy SOL for {usdcAmount} USDC
                         </>
                     )}
                 </button>
