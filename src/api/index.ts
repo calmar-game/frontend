@@ -49,6 +49,7 @@ export default api;
 
 export interface User {
   id: string;
+  accessToken?: string;
   walletAddress: string;
   username?: string;
   energyCurrent: number;
@@ -65,13 +66,16 @@ export interface User {
   updatedAt: string;
 }
 
-interface Task {
+export interface Task {
   id: number;
   title: string;
   description?: string;
   link?: string;
   condition: string;
   value: number;
+  createdAt?: string;
+  updatedAt?: string;
+  completed?: boolean;
 }
 
 export interface Player {
@@ -97,13 +101,13 @@ export async function loginUser(wallet: string, signature: string, nonce: string
     return data.data;
 }
 
-export async function getNonce(walletAddress: string): Promise<string | null> {
-  const data = await api.get<IResponse<{ nonce: string }>>(`/api/auth/nonce/${walletAddress}`);
+export async function getNonce(walletAddress: string): Promise<{ nonce: string } | null> {
+  const data = await api.get<{ nonce: string }>(`/api/auth/nonce/${walletAddress}`);
   return data.data;
 }
 
-export async function getGuestNonce(): Promise<string | null> {
-  const data = await api.get<IResponse<{ nonce: string }>>('/api/auth/nonce/guest/random');
+export async function getGuestNonce(): Promise<{ nonce: string } | null> {
+  const data = await api.get<{ nonce: string }>('/api/auth/nonce/guest/random');
   return data.data;
 }
 
@@ -113,7 +117,7 @@ export async function registration(
   signature: string,
   nonce: string
 ): Promise<User | null> {
-  const data = await api.post<IResponse<User>>('/api/auth/register', {
+  const data = await api.post<User>('/api/auth/register', {
       walletAddress,
       username,
       signature,
@@ -128,12 +132,12 @@ export async function getTopPlayers(): Promise<Player[]> {
 }
 
 export async function refreshAccessToken() {
-  const data = await api.post<IResponse<{ accessToken: string }>>('/api/auth/refresh');
+  const data = await api.post<{ accessToken: string }>('/api/auth/refresh');
   return data.data;
 }
 
-export async function getProfile(accessToken: string) {
-  const response = await api.get<IResponse<User>>('/api/profile', {
+export async function getProfile(accessToken: string): Promise<User> {
+  const response = await api.get<User>('/api/profile', {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -141,8 +145,8 @@ export async function getProfile(accessToken: string) {
   return response.data;
 }
 
-export async function updateProfile(data: { username: string; characterClass: CharacterClass }, accessToken: string) {
-  const res = await api.patch<IResponse<User>>('/api/profile', data, {
+export async function updateProfile(data: { username: string; characterClass: CharacterClass }, accessToken: string): Promise<User> {
+  const res = await api.patch<User>('/api/profile', data, {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -151,8 +155,8 @@ export async function updateProfile(data: { username: string; characterClass: Ch
 }
 
 
-export async function getTasks(accessToken: string) {
-  const response = await api.get<IResponse<Task[]>>('/api/tasks', {
+export async function getTasks(accessToken: string): Promise<Task[]> {
+  const response = await api.get<Task[]>('/api/tasks', {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -161,7 +165,7 @@ export async function getTasks(accessToken: string) {
 }
 
 export async function completeTask(accessToken: string, taskId: number): Promise<User> {
-  const response = await api.post<IResponse<Task>>(`/api/tasks/complete/${taskId}`, {}, {
+  const response = await api.post<User>(`/api/tasks/complete/${taskId}`, {}, {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }

@@ -2,26 +2,13 @@
 import { Star, Target, Zap, Play, Coins, CheckCircle2, Trophy } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { BuyPythiaModal } from '../components/BuyPythiaModal';
-import { GAME_AVATARS } from '../constants/avatars';
 import { useWalletStore } from '../store/walletStore';
 import { useAuthStore } from '../store/authStore';
 import { Navbar } from '../components/Navbar';
 import { useEffect, useState } from 'react';
-import { completeTask, getGameToken, getProfile, getTasks, User } from '../api';
-import React from 'react';
+import { completeTask, getGameToken, getProfile, getTasks, User, Task } from '../api';
 import { useWallet } from '@solana/wallet-adapter-react';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  link: string;
-  condition: string;
-  value: number;
-  createdAt: string;
-  updatedAt: string;
-  completed: boolean;
-}
+import { EagleIcon } from '../components/EagleIcon';
   
 
 
@@ -75,9 +62,6 @@ export function ProfilePage() {
   const location = useLocation();
   const showNavbar = !['/', '/setup'].includes(location.pathname);
 
-  
-  const avatar = profile ? GAME_AVATARS.find(avatar => avatar.id === profile?.characterClass) : null;
-
   const energyPercentage = (profile?.energyCurrent! / profile?.energyMax!) * 100;
 
   const currentPythiaBalance = pythiaBalance || 0;
@@ -90,254 +74,251 @@ export function ProfilePage() {
     <>
       {showNavbar && <Navbar />}
     
-    
-    <div className="min-h-screen w-full p-4 md:p-6 pb-32 bg-black grid-pattern">
-      <div className="max-w-xl mx-auto">
-        <div className="glass-effect pixel-corners p-4 md:p-6 mb-6">
-          <div className="flex flex-col items-center gap-4 mb-8">
-            <div 
-              className="w-16 h-16 md:w-20 md:h-20 
-                       flex items-center justify-center"
-              style={{ 
-                backgroundColor: avatar?.bgColor,
-                boxShadow: `0 0 10px ${avatar?.borderColor}` 
-              }}
-            >
-              {profile && avatar?.icon && (
-                React.createElement(avatar.icon, {
-                  size: 32,
-                  style: { color: avatar.borderColor },
-                  strokeWidth: 1.5
-                })
-              )}
-                          </div>
-            <div className="flex-1">
-              <h2 className="text-sm md:text-base text-center text-[#00ff00] tracking-wider mb-2">
-                {profile?.username!.toUpperCase()}
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: avatar?.borderColor }}>
-                  {avatar?.name}
-                </span>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-32">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -right-32 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative z-10 p-4 md:p-6">
+        <div className="max-w-xl mx-auto">
+          {/* Profile Header */}
+          <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl p-6 border border-slate-700/50 mb-6">
+            <div className="flex flex-col items-center gap-4 mb-6">
+              {/* Eagle Avatar Icon */}
+              <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-amber-500/20 via-yellow-500/20 to-orange-500/20 border-2 border-amber-500/40 backdrop-blur-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <EagleIcon size={64} className="text-amber-400" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: avatar?.bgColor }}>
-                    {profile?.avatar?.name}
-                  </span>
-                </div>
+              
+              {/* Username */}
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-amber-200 to-yellow-200 mb-1">
+                  {profile?.username}
+                </h2>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3">
-              <div className="glass-effect pixel-corners p-3 md:p-4">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {/* Level Card */}
+              <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl p-4 border border-slate-700/50">
                 <div className="flex items-center gap-2 mb-2">
-                  <Star className="w-4 h-4 text-[#00ff00]" />
-                  <span className="text-xs text-[#00ff00]">LEVEL</span>
+                  <Star className="w-4 h-4 text-purple-400" />
+                  <span className="text-xs text-gray-400 font-semibold">LEVEL</span>
                 </div>
-                <span className="text-lg md:text-xl text-[#00ff00] neon-text">{profile?.level}</span>
+                <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">{profile?.level}</span>
               </div>
+
+              {/* Leaderboard Card */}
               <Link
                 to="/leaderboard"
-                className="glass-effect pixel-corners p-3 md:p-4 block hover:neon-box transition-all duration-300"
+                className="bg-slate-800/50 backdrop-blur-xl rounded-xl p-4 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 block"
                 style={{ textDecoration: 'none' }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Trophy className="w-4 h-4 text-[#00ff00]" />
-                  <span className="text-xs text-[#00ff00]">Leaderboard</span>
+                  <Trophy className="w-4 h-4 text-blue-400" />
+                  <span className="text-xs text-gray-400 font-semibold">RANK</span>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-lg md:text-xl text-[#00ff00] neon-text">
-                    {rank} / {totalPlayers}
-                  </span>
+                <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                  {rank} / {totalPlayers}
+                </span>
+              </Link>
+
+              {/* Wealth Card */}
+              <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl p-4 border border-slate-700/50 col-span-2">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-cyan-400" />
+                    <span className="text-xs text-gray-400 font-semibold">$SOL BALANCE</span>
+                  </div>
                 </div>
-              </Link>  
-              <div className="glass-effect pixel-corners p-3 md:p-4 col-span-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <Coins className="w-4 h-4 text-[#00ff00]" />
-                  <span className="text-xs text-[#00ff00]">WEALTH</span>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-lg md:text-xl text-[#00ff00] neon-text">{pythiaBalance} $PYTHIA</span>
-                  <button
-                    onClick={() => setIsBuyModalOpen(true)}
-                    className="text-xs text-[#00ff00] hover:underline"
-                  >
-                    Buy More PYTHIA
-                  </button>
-                </div>
+                <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 block mb-3">{pythiaBalance} $SOL</span>
+                <button
+                  onClick={() => setIsBuyModalOpen(true)}
+                  className="w-full px-4 py-2 rounded-lg font-semibold text-xs
+                           bg-gradient-to-r from-cyan-500 to-blue-500 text-white
+                           hover:from-cyan-400 hover:to-blue-400
+                           transition-all duration-300 
+                           flex items-center justify-center gap-2
+                           shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-400/40"
+                >
+                  <Coins className="w-4 h-4" />
+                  Buy More $SOL
+                </button>
               </div>
             </div>
 
-            <div className="mb-8">
-              {/* Energy Cards */}
-              <div className="grid grid-cols-3 gap-2 mb-6">
-                <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                              ${currentPythiaBalance < 100 ? 'border border-[#00ff00]' : ''}`}>
+            {/* Energy Scale Section */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-400 mb-3 text-center">Energy Scale</h3>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className={`relative bg-slate-800/50 backdrop-blur-xl rounded-xl p-3 border text-center overflow-hidden transition-all
+                              ${currentPythiaBalance < 0.1 ? 'border-orange-500/50 shadow-lg shadow-orange-500/20' : 'border-slate-700/50'}`}>
                   <div className="relative z-10">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <Zap className="w-4 h-4 text-[#00ff00]" />
-                      <span className="text-lg font-bold text-[#00ff00]">30</span>
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Zap className="w-4 h-4 text-orange-400" fill="currentColor" />
+                      <span className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">40</span>
                     </div>
-                    <div className="text-[10px] text-gray-400">0-100 $PYTHIA</div>
+                    <div className="text-xs text-gray-400">0.01-0.1 $SOL</div>
                   </div>
-                  {currentPythiaBalance < 100 && (
-                    <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
+                  {currentPythiaBalance < 0.1 && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-orange-600/10 to-transparent animate-pulse"></div>
                   )}
                 </div>
 
-                <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                              ${currentPythiaBalance >= 100 && currentPythiaBalance < 300 ? 'border border-[#00ff00]' : ''}`}>
+                <div className={`relative bg-slate-800/50 backdrop-blur-xl rounded-xl p-3 border text-center overflow-hidden transition-all
+                              ${currentPythiaBalance >= 0.1 && currentPythiaBalance < 1 ? 'border-purple-500/50 shadow-lg shadow-purple-500/20' : 'border-slate-700/50'}`}>
                   <div className="relative z-10">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <Zap className="w-4 h-4 text-[#00ff00]" />
-                      <span className="text-lg font-bold text-[#00ff00]">60</span>
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Zap className="w-4 h-4 text-purple-400" fill="currentColor" />
+                      <span className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">80</span>
                     </div>
-                    <div className="text-[10px] text-gray-400">100-300 $PYTHIA</div>
+                    <div className="text-xs text-gray-400">0.1-1 $SOL</div>
                   </div>
-                  {currentPythiaBalance >= 100 && currentPythiaBalance < 300 && (
-                    <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
+                  {currentPythiaBalance >= 0.1 && currentPythiaBalance < 1 && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 to-transparent animate-pulse"></div>
                   )}
                 </div>
 
-                <div className={`glass-effect pixel-corners p-3 text-center relative overflow-hidden
-                              ${currentPythiaBalance >= 300 ? 'border border-[#00ff00]' : ''}`}>
+                <div className={`relative bg-slate-800/50 backdrop-blur-xl rounded-xl p-3 border text-center overflow-hidden transition-all
+                              ${currentPythiaBalance >= 1 ? 'border-cyan-500/50 shadow-lg shadow-cyan-500/20' : 'border-slate-700/50'}`}>
                   <div className="relative z-10">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <Zap className="w-4 h-4 text-[#00ff00]" />
-                      <span className="text-lg font-bold text-[#00ff00]">100</span>
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Zap className="w-4 h-4 text-cyan-400" fill="currentColor" />
+                      <span className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">120</span>
                     </div>
-                    <div className="text-[10px] text-gray-400">300+ $PYTHIA</div>
+                    <div className="text-xs text-gray-400">1+ $SOL</div>
                   </div>
-                  {currentPythiaBalance >= 300 && (
-                    <div className="absolute inset-0 bg-[#00ff00]/10 animate-pulse"></div>
+                  {currentPythiaBalance >= 1 && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-cyan-600/10 to-transparent animate-pulse"></div>
                   )}
                 </div>
               </div>
-
-              {/* Buy More PYTHIA Button */}
-              <button 
-                className="w-full p-2 glass-effect pixel-corners text-xs
-                         text-[#00ff00] hover:neon-box transition-all duration-300
-                         flex items-center justify-center gap-2 mb-6"
-                onClick={() => setIsBuyModalOpen(true)}
-                style={{
-                  border: '1px solid #00ff00',
-                }}
-              >
-                <Coins className="w-3 h-3" />
-                Buy More $PYTHIA
-              </button>
 
               {/* Current Energy Bar */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-[#00ff00]">Current Energy</span>
-                  <span className="text-[#00ff00]">{profile?.energyCurrent}/{profile?.energyMax}</span>
+                  <span className="text-gray-300 font-semibold flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-cyan-400" />
+                    Current Energy
+                  </span>
+                  <span className="text-cyan-400 font-bold">{profile?.energyCurrent}/{profile?.energyMax}</span>
                 </div>
-                <div className="w-full h-4 bg-black/30 rounded-full overflow-hidden pixel-corners">
+                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#00ff00] to-[#00ff99] relative"
+                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 relative transition-all duration-500"
                     style={{ width: `${energyPercentage}%` }}
                   >
-                    <div className="absolute inset-0 energy-bar opacity-30"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 animate-pulse"></div>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 text-center">Energy recharges 1 point every 8 hours</p>
+                <p className="text-xs text-gray-500 text-center">Energy recharges 1 point every 8 hours</p>
               </div>
             </div>
 
-
-            {
-  gameAccessToken !== null ? (
-    profile?.energyCurrent && profile?.energyCurrent > 0 ? (
-      <a
-        href={`https://backendforgames.com/runner/?walletAddress=${gameAccessToken}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full p-4 md:p-6 pixel-corners
-                   flex items-center justify-center gap-3 text-base md:text-lg font-bold
-                   transition-all duration-300 bg-[#00ff00] text-black hover:shadow-[0_0_20px_rgba(0,255,0,0.5)]"
-      >
-        <Play className="w-6 h-6" fill="currentColor" />
-        START GAME
-      </a>
-    ) : (
-      <div
-        className="w-full p-4 md:p-6 pixel-corners
-                   flex items-center justify-center gap-3 text-base md:text-lg font-bold
-                   transition-all duration-300 bg-gray-700 text-gray-300 cursor-not-allowed"
-      >
-        <Play className="w-6 h-6" fill="currentColor" />
-        NO ENERGY
-      </div>
-    )
-  ) : null
-}
+            {/* Start Game Button */}
+            {gameAccessToken !== null ? (
+              profile?.energyCurrent && profile?.energyCurrent > 0 ? (
+                <a
+                  href={`https://backendforgames.com/runner/?walletAddress=${gameAccessToken}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-6 py-4 rounded-xl font-bold text-lg
+                           bg-gradient-to-r from-purple-600 to-blue-600 text-white
+                           hover:from-purple-500 hover:to-blue-500
+                           transition-all duration-300 
+                           flex items-center justify-center gap-3
+                           shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-400/50"
+                >
+                  <Play className="w-6 h-6" fill="currentColor" />
+                  START GAME
+                </a>
+              ) : (
+                <div
+                  className="w-full px-6 py-4 rounded-xl font-bold text-lg
+                           bg-slate-800/50 text-gray-500
+                           flex items-center justify-center gap-3
+                           border border-slate-700/50 cursor-not-allowed"
+                >
+                  <Play className="w-6 h-6" fill="currentColor" />
+                  NO ENERGY
+                </div>
+              )
+            ) : null}
             
           </div>
 
-          <div className="glass-effect pixel-corners p-4 md:p-6">
-            {
-              tasks.length > 0
-              ? <div className="flex items-center gap-3 mb-6">
-                <Target className="w-6 h-6 text-[#00ff00]" />
-                <h2 className="text-lg text-[#00ff00]">Daily Tasks</h2>
+          {/* Daily Tasks Section */}
+          {tasks.length > 0 && (
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl p-6 border border-slate-700/50">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-purple-400" />
+                </div>
+                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-blue-200">
+                  Daily Tasks
+                </h2>
               </div>
-              : null
-            }
-            
-            
-            <div className="space-y-4">
-  {tasks.map((task) => (
-    <div 
-      key={task.id}
-      className={`glass-effect pixel-corners p-4 
-                hover:bg-white/5 transition-all duration-300`}
-    >
-      <div className="flex items-center gap-4">
-        <div className="flex-shrink-0">
-          {/* Если хочешь — можешь отрендерить иконку по условию task.condition */}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-sm text-[#00ff00] mb-1">{task.title}</h3>
-          {task.description && (
-            <p className="text-xs text-gray-400 mb-1">{task.description}</p>
+              
+              <div className="space-y-3">
+                {tasks.map((task) => (
+                  <div 
+                    key={task.id}
+                    className="bg-slate-800/50 backdrop-blur-xl rounded-xl p-4 border border-slate-700/50 hover:border-purple-500/30 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-white mb-1">{task.title}</h3>
+                        {task.description && (
+                          <p className="text-xs text-gray-400 mb-1">{task.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="text-purple-400 font-extrabold flex items-center gap-1">
+                            <Zap className="inline w-4 h-4 text-purple-400" fill="currentColor" />
+                            {task.value}
+                          </span>
+                          {/* <span>•</span> */}
+                          {/* <span>{task.condition}</span> */}
+                        </div>
+                      </div>
+                      {task.completed ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-400 flex-shrink-0" />
+                      ) : (
+                        <button
+                          disabled={tasksLoading}
+                          onClick={() => {
+                            if (task.link) window.open(task.link, '_blank');
+                            if (!accessToken) return;
+                            setTasksLoading(true);
+                            completeTask(String(accessToken), task.id).then((r) => {
+                              setProfile(r);
+                            }).catch((e) => console.error('Failed to complete task:', e));
+                            setTimeout(() => {
+                              getTasks(String(accessToken))
+                              .then((r) => {
+                                setTasks(r);
+                              })
+                              .catch((e) => console.error('Failed to load tasks:', e));
+                              setTasksLoading(false);
+                            }, 2000);
+                          }}
+                          className="px-4 py-2 text-xs font-semibold rounded-lg
+                                   bg-gradient-to-r from-purple-600 to-blue-600 text-white
+                                   hover:from-purple-500 hover:to-blue-500
+                                   transition-all duration-300 flex-shrink-0
+                                   disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {tasksLoading ? 'Loading...' : 'Complete'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
-          <p className="text-xs text-gray-400">
-            {task.value} XP — {task.condition}
-          </p>
-        </div>
-        {task.completed ? (
-          <CheckCircle2 className="w-6 h-6 text-[#00ff00]" />
-        ) : (
-          <button
-            disabled={tasksLoading}
-            onClick={() => {
-              if (task.link) window.open(task.link, '_blank');
-              if (!accessToken) return;
-              setTasksLoading(true);
-              completeTask(String(accessToken), task.id).then((r) => {
-                setProfile(r);
-              });
-              setTimeout(() => {
-                getTasks(String(accessToken))
-                .then((r) => setTasks(r))
-                .catch((e) => console.error('Failed to load tasks:', e));
-                setTasksLoading(false);
-              }, 2000);
-            }}
-            className="px-4 py-2 text-xs text-[#00ff00] glass-effect pixel-corners
-                    hover:neon-box transition-all duration-300"
-          >
-            Complete
-          </button>
-        )}
-      </div>
-    </div>
-  ))}
-</div>
-          </div>
         </div>
       </div>
 
@@ -350,7 +331,7 @@ export function ProfilePage() {
             refreshBalance();
             getProfile(String(accessToken)).then((r) => {
               setProfile(r);
-            });
+            }).catch((e) => console.error('Failed to refresh profile:', e));
           }, 10000);
         }}
       />

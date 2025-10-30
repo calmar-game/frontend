@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { refreshAccessToken } from '../api';
 import { useAuthStore } from '../store/authStore';
 import { Loader } from 'lucide-react';
-import { LoadingScreen } from './LoadingScreen';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { accessToken, setAccessToken } = useAuthStore();
@@ -11,35 +10,36 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // const navigate = useNavigate();
 
 
-  const check = async () => {
-    setLoading(true);
-      if (!accessToken) {
-        refreshAccessToken().then((r) => {
-          setAccessToken(r.accessToken);
-        }).catch((err) => {
-
-        }).finally(() => {
-          setLoading(false);
-        })
-        // if (token) {
-            // setLoading(false);
-        //   setAccessToken(token);
-        // } else {
-            // setLoading(false);
-
-        //   return navigate('/connect');
-        // }
-      }
-
-    //   setLoading(false);
-  };
 
 
   useEffect(() => {
-      check();
-  }, [accessToken]);
+    const check = async () => {
+      setLoading(true);
+        if (!accessToken) {
+          refreshAccessToken().then((r) => {
+            setAccessToken(r.accessToken);
+          }).catch(() => {
+            setLoading(false);
+          }).finally(() => {
+            setLoading(false);
+          })
+          // if (token) {
+              // setLoading(false);
+          //   setAccessToken(token);
+          // } else {
+              // setLoading(false);
+  
+          //   return navigate('/connect');
+          // }
+        }
+  
+      //   setLoading(false);
+    };
 
-  // if (loading) return <LoadingScreen />;
+      check();
+  }, [accessToken, setAccessToken]);
+
+  // if (loading) return <Loader />;
 
   return <>{children}</>;
 };

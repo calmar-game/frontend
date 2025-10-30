@@ -10,21 +10,21 @@ const JUPITER_API = "https://quote-api.jup.ag/v6";
 
 // Token addresses
 const SOL_MINT = "So11111111111111111111111111111111111111112";
-const PYTHIA_MINT = "CreiuhfwdWCN5mJbMJtA9bBpYQrQF2tCBuZwSPWfpump";
+const USDT_MINT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"; // USDT on Solana
 
-export async function buyPythia(solAmount: number, userPublicKey: PublicKey) {
+export async function buySolWithUsdt(usdtAmount: number, userPublicKey: PublicKey) {
     try {
-        console.log(`🔄 Getting quote for ${solAmount} SOL to PYTHIA swap...`);
+        console.log(`🔄 Getting quote for ${usdtAmount} USDT to SOL swap...`);
 
-        // 1. Get quote
+        // 1. Get quote (USDT -> SOL)
         const quoteResponse = await axios.get(`${JUPITER_API}/quote`, {
             params: {
-                inputMint: SOL_MINT,
-                outputMint: PYTHIA_MINT,
-                amount: Math.floor(solAmount * 1e9),
+                inputMint: USDT_MINT,
+                outputMint: SOL_MINT,
+                amount: Math.floor(usdtAmount * 1e6), // USDT has 6 decimals
                 slippageBps: 100,
                 feeBps: 4,
-                onlyDirectRoutes: true,
+                onlyDirectRoutes: false, // Allow routes through other tokens if needed
             }
         });
 
@@ -32,7 +32,7 @@ export async function buyPythia(solAmount: number, userPublicKey: PublicKey) {
             throw new Error('Failed to get quote from Jupiter');
         }
 
-        console.log(`✅ Got quote. Expected output: ${quoteResponse.data.outAmount} PYTHIA`);
+        console.log(`✅ Got quote. Expected output: ${quoteResponse.data.outAmount / 1e9} SOL`);
 
         // 2. Get swap transaction
         const swapResponse = await axios.post(`${JUPITER_API}/swap`, {
@@ -52,7 +52,7 @@ export async function buyPythia(solAmount: number, userPublicKey: PublicKey) {
         return transaction;
 
     } catch (error) {
-        console.error("Error buying PYTHIA:", error);
+        console.error("Error buying SOL with USDT:", error);
         throw error;
     }
 }

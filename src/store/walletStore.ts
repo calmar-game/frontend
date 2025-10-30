@@ -1,7 +1,6 @@
 // stores/useWalletStore.ts
 import { create } from 'zustand';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { getAccount } from '@solana/spl-token';
+import { PublicKey, Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 const SOLANA_RPC = "https://clean-old-mountain.solana-mainnet.quiknode.pro/c2394ff78485f0cc2af2fd4eaf0a51574f59c2f0";
 
@@ -13,12 +12,11 @@ interface WalletState {
     isConnected: boolean;
     publicKey: PublicKey;
   }) => void;
-  setBalance: (pythia: number) => void;
+  setBalance: (sol: number) => void;
   refreshBalance: () => Promise<void>;
 }
 
 const connection = new Connection(SOLANA_RPC);
-const mint = new PublicKey('CreiuhfwdWCN5mJbMJtA9bBpYQrQF2tCBuZwSPWfpump')
 
 export const useWalletStore = create<WalletState>((set, get) => ({
   isConnected: false,
@@ -29,9 +27,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ isConnected, publicKey });
   },
 
-  setBalance: (pythia) => {
+  setBalance: (sol) => {
     set({
-      pythiaBalance: pythia,
+      pythiaBalance: sol,
     });
   },
 
@@ -40,17 +38,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     if (!publicKey) return;
 
     try {
-      const tokenAccounts = await connection.getTokenAccountsByOwner(publicKey, {
-        mint,
-      });
-
-      console.log(tokenAccounts)
-
-      if (tokenAccounts.value.length > 0) {
-        const account = await getAccount(connection, tokenAccounts.value[0].pubkey);
-        const newBalance = Number(account.amount) / Math.pow(10, 6);
-        get().setBalance(newBalance);
-      }
+      // Get native SOL balance
+      const balance = await connection.getBalance(publicKey);
+      const solBalance = balance / LAMPORTS_PER_SOL;
+      
+      console.log('SOL Balance:', solBalance);
+      get().setBalance(solBalance);
     } catch (e) {
       console.error('[refreshBalance] Failed:', e);
     }

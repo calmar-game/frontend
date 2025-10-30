@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, AlertCircle, Info } from 'lucide-react';
-import { GAME_AVATARS, CharacterClass } from '../constants/avatars';
+import { AlertCircle, Info, ArrowRight, User } from 'lucide-react';
+import { CharacterClass } from '../constants/avatars';
 import { useAuthStore } from '../store/authStore';
 import { getProfile, updateProfile } from '../api';
 
@@ -9,13 +9,16 @@ export function SetupPage() {
   const navigate = useNavigate();
   const { accessToken } = useAuthStore();
   const [username, setUsername] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState<CharacterClass>(CharacterClass.CYBER_SENTINEL); // default
+  // Hidden default class selection - user doesn't choose, we set it automatically
+  const [selectedAvatar] = useState<CharacterClass>(CharacterClass.CYBER_SENTINEL);
   const [error, setError] = useState('');
-  const [showAvatarInfo, setShowAvatarInfo] = useState<CharacterClass | null>(null);
+  // const [showAvatarInfo, setShowAvatarInfo] = useState<CharacterClass | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getMe = () => {
+  const getMe = useCallback(() => {
     getProfile(String(accessToken)).then((r) => {
+
+      // @ts-expect-error isProfileCompleted is not null
       if (r.isProfileCompleted === true) {
         navigate("/profile");
         // window.location.href = "/runner"
@@ -23,7 +26,7 @@ export function SetupPage() {
     }).catch((err) => {
       console.info(err)
     });
-  };
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     if (accessToken === null) {
@@ -31,7 +34,7 @@ export function SetupPage() {
     } else {
       getMe();
     }
-  }, [accessToken, navigate]);
+  }, [accessToken, navigate, getMe]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,39 +79,99 @@ export function SetupPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-black grid-pattern">
-      <div className="max-w-md w-full">
-        <form onSubmit={handleSubmit} className="glass-effect pixel-corners p-6 md:p-8">
-          <h1 className="text-[#00ff00] text-xl md:text-2xl mb-8 text-center tracking-wider">
-            CUSTOMIZE YOUR PROFILE
-          </h1>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -right-32 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
 
-          {/* Username Input */}
-          <div className="mb-8">
-            <label className="block text-[#00ff00] text-sm mb-2">CHOOSE USERNAME</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setError('');
-              }}
-              className="w-full bg-black/30 text-white px-4 py-3 glass-effect pixel-corners
-                       focus:outline-none focus:ring-1 focus:ring-[#00ff00]
-                       placeholder:text-gray-500"
-              placeholder="Enter username"
-            />
-            {error && (
-              <div className="flex items-center gap-2 mt-2 text-red-400 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{error}</span>
-              </div>
-            )}
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-6">
+        <div className="max-w-md w-full">
+          {/* Header Section */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 backdrop-blur-xl">
+              <User className="w-8 h-8 text-blue-400" />
+            </div>
+            
+            <h1 className="text-3xl font-bold mb-2">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-blue-200">
+                Create Profile
+              </span>
+            </h1>
+            
+            <p className="text-sm text-gray-400">
+              Set up your username to continue
+            </p>
           </div>
 
-          {/* Avatar Selection */}
-          <div className="mb-8">
-            <label className="block text-[#00ff00] text-sm mb-4">SELECT CHARACTER CLASS</label>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Username Input Card */}
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl p-6 border border-slate-700/50">
+              <label className="block text-white text-sm font-semibold mb-3">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setError('');
+                }}
+                className="w-full bg-slate-800/50 text-white px-4 py-3 rounded-lg
+                         border border-slate-700 focus:border-purple-500/50
+                         focus:outline-none focus:ring-2 focus:ring-purple-500/20
+                         placeholder:text-gray-500 transition-all"
+                placeholder="Enter your username"
+                maxLength={15}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                characters, letters, numbers, and underscores only
+              </p>
+              {error && (
+                <div className="flex items-center gap-2 mt-3 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Info Card */}
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl p-4 border border-slate-700/50">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-gray-300 mb-1">
+                    After registration, the game and all features will be available to you.
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Complete your profile and jump into gameplay and earning rewards!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full px-6 py-4 rounded-xl font-semibold 
+                       bg-gradient-to-r from-purple-600 to-blue-600 text-white
+                       hover:from-purple-500 hover:to-blue-500
+                       transition-all duration-300 
+                       flex items-center justify-center gap-2 text-base
+                       shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-400/50
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
+            >
+              {isLoading ? 'Loading...' : 'Continue to Game'}
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </form>
+
+          {/* Commented out character selection - kept for potential future use */}
+          {/* 
+          <div className="mb-6">
+            <label className="block text-white text-sm font-semibold mb-4">Select Character Class</label>
             <div className="grid grid-cols-5 gap-3">
               {GAME_AVATARS.map((avatar) => (
                 <div key={avatar.id} className="relative">
@@ -117,7 +180,7 @@ export function SetupPage() {
                     onClick={() => setSelectedAvatar(avatar.id)}
                     onMouseEnter={() => setShowAvatarInfo(avatar.id)}
                     onMouseLeave={() => setShowAvatarInfo(null)}
-                    className={`relative aspect-square overflow-hidden pixel-corners
+                    className={`relative aspect-square overflow-hidden rounded-lg
                              transition-all duration-300 flex items-center justify-center
                              ${selectedAvatar === avatar.id
                                ? 'ring-2'
@@ -144,11 +207,10 @@ export function SetupPage() {
                       </div>
                     )}
                   </button>
-
                   {showAvatarInfo === avatar.id && (
                     <div 
                       className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-48 
-                               glass-effect pixel-corners p-2 z-50"
+                               bg-slate-900/95 backdrop-blur-xl rounded-lg p-2 z-50 border"
                       style={{ borderColor: avatar.borderColor }}
                     >
                       <div className="text-center">
@@ -163,30 +225,8 @@ export function SetupPage() {
               ))}
             </div>
           </div>
-
-          {/* Selected Character Info */}
-          <div className="mb-8 glass-effect pixel-corners p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Info className="w-4 h-4 text-[#00ff00]" />
-              <span className="text-sm text-[#00ff00]">Selected: {selectedAvatar}</span>
-            </div>
-            <p className="text-xs text-gray-400">
-              {GAME_AVATARS.find((a) => a.id === selectedAvatar)?.description}
-            </p>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#00ff00] text-black p-4 pixel-corners
-                     hover:neon-box transition-all duration-300
-                     flex items-center justify-center gap-3 text-base font-bold tracking-wider
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            CONTINUE TO GAME
-          </button>
-        </form>
+          */}
+        </div>
       </div>
     </div>
   );
