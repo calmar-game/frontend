@@ -223,7 +223,7 @@ export function ProfilePage() {
               profile?.energyCurrent && profile?.energyCurrent > 0 ? (
                 <a
                 //TODO: remove this after testing
-                  href={`https://backendforgames.com/runner/?walletAddress=${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI3LCJ3YWxsZXRBZGRyZXNzIjoiMm9zYWh6ZG9UeDFuYmpUUVc2aVFWYTVqdkVrRlVNQzJ2ZWdVd2JKN1JMRkIiLCJpYXQiOjE3NjE4Njk5ODEsImV4cCI6MTc2MjQ3NDc4MX0._ElhvwPYn1I0t2rWKLJ-_G5LTprdBehgbYQIAzPqVso"}`}
+                  href={`https://backendforgames.com/runner/?walletAddress=${gameAccessToken}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full px-6 py-4 rounded-xl font-bold text-lg
